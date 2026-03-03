@@ -3,147 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game THR Keluarga Yudi - Auto Jackpot</title>
+    <title>Aplikasi THR Keluarga Yudi</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0d47a1, #1976d2); color: white; text-align: center; padding: 10px; min-height: 100vh; margin: 0; }
-        .card { background: white; color: #333; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 450px; margin: 10px auto; }
-        h1 { color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); font-size: 1.5em; margin: 10px 0; }
-        .input-group { text-align: left; margin-bottom: 12px; }
-        label { font-size: 0.85em; font-weight: bold; color: #555; }
-        input { width: 100%; padding: 12px; margin-top: 5px; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1em; }
-        button { background: linear-gradient(to right, #1565c0, #1976d2); color: white; border: none; padding: 15px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1em; transition: 0.3s; margin-top: 10px; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .num-btn { background: #f5f5f5; color: #333; padding: 20px 5px; border-radius: 15px; font-size: 1.3em; font-weight: bold; cursor: pointer; border: 3px solid #e0e0e0; display: flex; align-items: center; justify-content: center; min-height: 50px; box-shadow: inset 0 -4px 0 #ddd; transition: 0.5s; }
-        .revealed { background: #fff !important; color: #1565c0 !important; font-size: 0.85em !important; transform: rotateY(360deg); border-color: #1976d2; box-shadow: none; }
-        .jackpot { background: #ffd700 !important; color: #d32f2f !important; animation: pulse 1s infinite alternate; border-color: #ff9800; font-weight: bold; }
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
-        #display-budget { font-size: 1.1em; background: #e3f2fd; padding: 10px; border-radius: 10px; color: #0d47a1; font-weight: bold; margin-bottom: 15px; border: 1px solid #bbdefb; }
-        .recap-container { margin-top: 20px; text-align: left; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #f2f2f2; color: #0d47a1; }
-        .row-jackpot { background-color: #fff9c4; font-weight: bold; }
+        :root {
+            --primary: #1b5e20;
+            --gold: #ffd700;
+            --white: #ffffff;
+            --dark: #003300;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle, #1b5e20 0%, #002200 100%);
+            color: var(--white);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Animasi Background */
+        .stars {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/stardust.png');
+            z-index: -1;
+            animation: moveStars 50s linear infinite;
+        }
+
+        @keyframes moveStars {
+            from { background-position: 0 0; }
+            to { background-position: 1000px 1000px; }
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--gold);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            font-weight: 800;
+            margin-top: 30px;
+            animation: fadeInDown 1s ease;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 20px;
+            color: #333;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            margin-top: 20px;
+            animation: zoomIn 0.8s ease;
+        }
+
+        /* Dashboard Styles */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .menu-item {
+            background: linear-gradient(135deg, var(--primary), var(--dark));
+            color: var(--gold);
+            padding: 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 2px solid var(--gold);
+            font-weight: 600;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Form Styles */
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .btn-main {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* Game Grids */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .item {
+            background: #eee;
+            height: 80px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            border-bottom: 4px solid #ccc;
+        }
+
+        .item.revealed {
+            background: var(--white) !important;
+            border-bottom: none;
+            transform: rotateY(360deg);
+        }
+
+        .jackpot {
+            background: var(--gold) !important;
+            color: #d32f2f !important;
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        .recap-table {
+            width: 100%; margin-top: 20px; border-collapse: collapse; font-size: 0.8em;
+        }
+        .recap-table th, td { border: 1px solid #ddd; padding: 8px; }
+
+        .back-btn {
+            background: #757575; color: white; border: none; padding: 8px 15px;
+            border-radius: 8px; margin-bottom: 15px; cursor: pointer; float: left;
+        }
     </style>
 </head>
 <body>
 
-    <h1>💰 THR DIGITAL YUDI 💰</h1>
+    <div class="stars"></div>
 
-    <div class="card" id="setup-screen">
-        <h2>Atur Game</h2>
-        <div class="input-group">
-            <label>Jumlah Peserta:</label>
-            <input type="number" id="total-peserta" value="7" min="2">
+    <div class="container">
+        <h1>🌙 EID MUBARAK 🌙</h1>
+        <p style="color: var(--gold); font-weight: 600;">Aplikasi Bagi THR Yudi v2.0</p>
+
+        <div id="dashboard" class="card">
+            <h2>Pilih Game Seru</h2>
+            <div class="menu-grid">
+                <div class="menu-item" onclick="showSetup('angka')">
+                    🔢 Tebak Angka Keberuntungan
+                </div>
+                <div class="menu-item" onclick="showSetup('box')">
+                    📦 Mystery Box Idul Fitri
+                </div>
+            </div>
+            <p style="font-size: 0.8em; margin-top: 20px; color: #666;">Silakan pilih mode permainan untuk memulai</p>
         </div>
-        <div class="input-group">
-            <label>Total Budget Bagi-Bagi (Rp):</label>
-            <input type="number" id="total-budget" value="1000000" step="1000">
+
+        <div id="setup-screen" class="card" style="display: none;">
+            <button class="back-btn" onclick="showDashboard()">← Kembali</button>
+            <h2 id="setup-title">Konfigurasi Game</h2>
+            <input type="number" id="total-peserta" placeholder="Jumlah Peserta" value="7">
+            <input type="number" id="total-budget" placeholder="Total Budget (Rp)" value="500000">
+            <button class="btn-main" onclick="startGame()">Mulai Sekarang 🚀</button>
         </div>
-        <button onclick="siapkanGame()">Kocok Angka & Mulai!</button>
+
+        <div id="game-screen" class="card" style="display: none;">
+            <div id="budget-info" style="font-weight: bold; color: var(--primary); margin-bottom: 10px;">
+                Sisa Budget: <span id="sisa-val">0</span>
+            </div>
+            <div id="game-area" class="game-grid"></div>
+            
+            <div style="margin-top:20px; text-align: left;">
+                <h4 style="margin: 5px 0;">📊 Rekap Pemenang:</h4>
+                <table class="recap-table">
+                    <thead><tr><th>No</th><th>Hasil</th><th>Status</th></tr></thead>
+                    <tbody id="recap-body"></tbody>
+                </table>
+            </div>
+            <button class="btn-main" onclick="showDashboard()" style="background:#757575;">Selesai & Keluar</button>
+        </div>
     </div>
 
-    <div class="card" id="game-screen" style="display:none;">
-        <div id="display-budget">Sisa Budget: Rp 0</div>
-        <div class="grid" id="number-grid"></div>
-        <div class="recap-container">
-            <h3>📊 Rekap Hasil:</h3>
-            <table id="recap-table">
-                <thead>
-                    <tr><th>Angka</th><th>Nominal</th><th>Status</th></tr>
-                </thead>
-                <tbody id="recap-body"></tbody>
-            </table>
-        </div>
-        <button onclick="resetGame()" style="background: #757575; margin-top: 20px;">Main Ulang</button>
-    </div>
-
-    <audio id="snd-click" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" preload="auto"></audio>
-    <audio id="snd-jackpot" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3" preload="auto"></audio>
+    <audio id="snd-open" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="snd-win" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
 
 <script>
-    let dataTHR = {};
-    let angkaAjaib = 0;
-    let sisaBudgetGlobal = 0;
+    let currentGameMode = '';
+    let boxValues = [];
+    let jackpotIndex = -1;
+    let sisaBudget = 0;
 
-    function formatRupiah(angka) {
-        return "Rp" + new Intl.NumberFormat('id-ID').format(angka);
+    function formatIDR(val) {
+        return "Rp" + new Intl.NumberFormat('id-ID').format(val);
     }
 
-    function siapkanGame() {
-        const jmlPeserta = parseInt(document.getElementById('total-peserta').value);
-        const totalBudget = parseInt(document.getElementById('total-budget').value);
-        if (!jmlPeserta || !totalBudget) return alert("Isi data!");
+    function showDashboard() {
+        document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'none';
+    }
 
-        angkaAjaib = Math.floor(Math.random() * jmlPeserta) + 1;
-        let nominalJackpot = Math.round((totalBudget * (0.2 + Math.random() * 0.15)) / 1000) * 1000;
-        let sisaUang = totalBudget - nominalJackpot;
-        let perOrangBiasaBase = Math.floor(sisaUang / (jmlPeserta - 1));
+    function showSetup(mode) {
+        currentGameMode = mode;
+        document.getElementById('setup-title').innerText = mode === 'angka' ? 'Setup Tebak Angka' : 'Setup Mystery Box';
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('setup-screen').style.display = 'block';
+    }
+
+    function startGame() {
+        const jml = parseInt(document.getElementById('total-peserta').value);
+        const budget = parseInt(document.getElementById('total-budget').value);
+        if(!jml || !budget) return alert("Isi data!");
+
+        sisaBudget = budget;
+        document.getElementById('sisa-val').innerText = formatIDR(budget);
         
-        sisaBudgetGlobal = totalBudget;
-        document.getElementById('number-grid').innerHTML = "";
-        document.getElementById('recap-body').innerHTML = "";
+        // Algoritma Smart Jackpot (25-40%)
+        jackpotIndex = Math.floor(Math.random() * jml);
+        let jackpotVal = Math.round((budget * (0.25 + Math.random() * 0.15)) / 1000) * 1000;
+        let sisaUang = budget - jackpotVal;
+        let perOrangBase = Math.floor(sisaUang / (jml - 1));
 
-        let temporaryData = [];
-        for (let i = 1; i <= jmlPeserta; i++) {
-            if (i === angkaAjaib) {
-                temporaryData[i] = nominalJackpot;
+        boxValues = [];
+        for(let i=0; i<jml; i++) {
+            if(i === jackpotIndex) {
+                boxValues[i] = jackpotVal;
             } else {
-                let variasi = Math.floor((Math.random() * 0.3 - 0.15) * perOrangBiasaBase);
-                let nominal = Math.round((perOrangBiasaBase + variasi) / 1000) * 1000;
-                if (nominal > sisaUang) nominal = perOrangBiasaBase;
-                temporaryData[i] = nominal;
-                sisaUang -= nominal;
+                let factor = currentGameMode === 'box' ? (0.5 + Math.random()) : (0.8 + Math.random() * 0.4);
+                let val = Math.round((perOrangBase * factor) / 1000) * 1000;
+                if(val > sisaUang) val = perOrangBase;
+                boxValues[i] = val;
+                sisaUang -= val;
             }
         }
+        
+        // Koreksi budget pas
+        if(sisaUang !== 0) boxValues[jackpotIndex === 0 ? 1 : 0] += sisaUang;
 
-        if (sisaUang !== 0) {
-            for (let i = 1; i <= jmlPeserta; i++) {
-                if (i !== angkaAjaib) { temporaryData[i] += sisaUang; break; }
-            }
-        }
-
-        dataTHR = temporaryData;
-        for (let i = 1; i <= jmlPeserta; i++) {
-            const btn = document.createElement('div');
-            btn.className = 'num-btn';
-            btn.id = 'btn-' + i;
-            btn.innerText = i;
-            btn.onclick = () => bukaAngka(i);
-            document.getElementById('number-grid').appendChild(btn);
-        }
-
-        document.getElementById('display-budget').innerText = "Total: " + formatRupiah(totalBudget);
+        renderGame(jml);
         document.getElementById('setup-screen').style.display = 'none';
         document.getElementById('game-screen').style.display = 'block';
     }
 
-    function bukaAngka(nomor) {
-        const btn = document.getElementById('btn-' + nomor);
-        if (btn.classList.contains('revealed')) return;
-
-        const nominal = dataTHR[nomor];
-        btn.classList.add('revealed');
-        btn.innerText = formatRupiah(nominal);
-
-        const row = document.createElement('tr');
-        if (nomor === angkaAjaib) row.className = 'row-jackpot';
-        row.innerHTML = `<td>${nomor}</td><td>${formatRupiah(nominal)}</td><td>${nomor === angkaAjaib ? 'JACKPOT 🎉' : 'Biasa'}</td>`;
-        document.getElementById('recap-body').appendChild(row);
-
-        if (nomor === angkaAjaib) {
-            document.getElementById('snd-jackpot').play().catch(()=>{});
-            btn.classList.add('jackpot');
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        } else {
-            document.getElementById('snd-click').play().catch(()=>{});
+    function renderGame(jml) {
+        const area = document.getElementById('game-area');
+        area.innerHTML = "";
+        document.getElementById('recap-body').innerHTML = "";
+        
+        for(let i=0; i<jml; i++) {
+            const content = currentGameMode === 'angka' ? (i+1) : '📦';
+            area.innerHTML += `
+                <div class="item" id="item-${i}" onclick="reveal(${i})">
+                    ${content}
+                </div>
+            `;
         }
-
-        sisaBudgetGlobal -= nominal;
-        document.getElementById('display-budget').innerText = "Sisa: " + formatRupiah(Math.max(0, sisaBudgetGlobal));
     }
 
-    function resetGame() { if(confirm("Ulang?")) location.reload(); }
+    function reveal(idx) {
+        const el = document.getElementById('item-' + idx);
+        if(el.classList.contains('revealed')) return;
+
+        const val = boxValues[idx];
+        el.classList.add('revealed');
+        el.innerText = formatIDR(val);
+
+        if(idx === jackpotIndex) {
+            el.classList.add('jackpot');
+            document.getElementById('snd-win').play().catch(()=>{});
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        } else {
+            document.getElementById('snd-open').play().catch(()=>{});
+        }
+
+        const row = document.createElement('tr');
+        if(idx === jackpotIndex) row.style.background = "#fff9c4";
+        row.innerHTML = `<td>${idx+1}</td><td>${formatIDR(val)}</td><td>${idx === jackpotIndex ? 'JACKPOT 🎉' : 'Biasa'}</td>`;
+        document.getElementById('recap-body').appendChild(row);
+
+        sisaBudget -= val;
+        document.getElementById('sisa-val').innerText = formatIDR(Math.max(0, sisaBudget));
+    }
 </script>
 </body>
 </html>
