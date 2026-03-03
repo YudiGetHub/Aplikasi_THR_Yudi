@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi THR Keluarga Yudi v5.0</title>
+    <title>Aplikasi THR Keluarga Yudi v8.0</title>
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=8M9S0u8N"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -12,26 +13,25 @@
         .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/stardust.png'); z-index: -1; animation: moveStars 50s linear infinite; }
         @keyframes moveStars { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
         .container { max-width: 500px; margin: auto; padding: 20px; text-align: center; }
-        .card { background: rgba(255, 255, 255, 0.95); border-radius: 25px; padding: 20px; color: #333; box-shadow: 0 15px 35px rgba(0,0,0,0.4); margin-top: 20px; animation: zoomIn 0.5s ease; }
-        .menu-item { background: linear-gradient(135deg, var(--primary), #003300); color: var(--gold); padding: 20px; border-radius: 15px; cursor: pointer; margin-bottom: 15px; border: 2px solid var(--gold); font-weight: 600; transition: 0.3s; }
+        .card { background: rgba(255, 255, 255, 0.95); border-radius: 25px; padding: 20px; color: #333; box-shadow: 0 15px 35px rgba(0,0,0,0.4); margin-top: 20px; animation: zoomIn 0.5s ease; border: 1px solid var(--gold); }
+        .menu-item { background: linear-gradient(135deg, var(--primary), #003300); color: var(--gold); padding: 20px; border-radius: 15px; cursor: pointer; margin-bottom: 15px; border: 2px solid var(--gold); font-weight: 600; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .menu-item:hover { transform: scale(1.03); background: var(--primary); }
         
-        /* Game Angka Grid */
         .grid-angka { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .num-btn { background: #eee; height: 70px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; font-weight: bold; cursor: pointer; border-bottom: 5px solid #ccc; }
-        .num-btn.revealed { background: var(--white); border: none; font-size: 0.85em; color: var(--primary); transform: rotateY(360deg); transition: 0.6s; }
+        .num-btn { background: #eee; height: 75px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.6em; font-weight: bold; cursor: pointer; border-bottom: 6px solid #ccc; transition: 0.3s; }
+        .num-btn.revealed { background: var(--white); border: 2px solid var(--primary); font-size: 0.85em; color: var(--primary); transform: rotateY(360deg); transition: 0.8s; }
 
-        /* Slot Bar Area */
-        .slot-container { background: #333; padding: 20px; border-radius: 15px; border: 4px solid var(--gold); margin: 20px 0; position: relative; overflow: hidden; height: 100px; display: flex; align-items: center; justify-content: center; }
-        #slot-val { color: var(--gold); font-size: 2.2em; font-weight: 800; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-        .slot-label { font-size: 0.8em; color: #aaa; margin-bottom: 5px; }
-
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        .btn-main { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1.1em; }
-        .back-btn { background: #757575; color: white; border: none; padding: 5px 12px; border-radius: 5px; float: left; cursor: pointer; margin-bottom: 10px; }
+        .slot-container { background: #111; padding: 25px; border-radius: 20px; border: 4px solid var(--gold); margin: 20px 0; height: 110px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 30px #000; }
+        #slot-val { color: var(--gold); font-size: 2.3em; font-weight: 800; text-shadow: 0 0 15px rgba(255, 215, 0, 0.8); letter-spacing: 1px; }
         
-        .recap-container { margin-top: 20px; max-height: 200px; overflow-y: auto; text-align: left; font-size: 0.8em; background: #f9f9f9; border-radius: 10px; padding: 10px; }
-        table { width: 100%; border-collapse: collapse; color: #333; }
-        th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; font-family: inherit; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 16px; width: 100%; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1.1em; box-shadow: 0 5px #003300; transition: 0.1s; }
+        .btn-main:active { transform: translateY(3px); box-shadow: 0 2px #003300; }
+        .back-btn { background: #757575; color: white; border: none; padding: 6px 15px; border-radius: 8px; float: left; cursor: pointer; margin-bottom: 10px; font-size: 0.8em; }
+        
+        .recap-container { margin-top: 25px; max-height: 250px; overflow-y: auto; text-align: left; font-size: 0.85em; background: #fff; border: 2px solid #eee; border-radius: 15px; padding: 12px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border-bottom: 1px solid #f0f0f0; padding: 12px; text-align: center; }
         @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
@@ -39,52 +39,52 @@
 
 <div class="stars"></div>
 <div class="container">
-    <h1 style="color:var(--gold); margin-top:30px;">🌙 EID MUBARAK 🌙</h1>
+    <h1 style="color:var(--gold); margin-top:30px; text-shadow: 2px 2px #000;">🌙 EID MUBARAK 🌙</h1>
 
     <div id="dashboard" class="card">
-        <h2>Menu Game THR</h2>
+        <h2 style="margin-bottom: 20px; color: var(--primary);">Main Game THR</h2>
         <div class="menu-item" onclick="openSetup('angka')">🔢 Tebak Angka Keberuntungan</div>
-        <div class="menu-item" onclick="openSetup('bar')">🎰 Slot Bar (Acak Eliminasi)</div>
+        <div class="menu-item" onclick="openSetup('bar')">🎰 Slot Bar (Secret Shuffle)</div>
+        <p style="font-size: 0.7em; color: #888;">Eksklusif: Fitur Suara Aktif ✅</p>
     </div>
 
     <div id="setup" class="card" style="display:none;">
-        <button class="back-btn" onclick="showDashboard()">← Menu</button><br>
-        <h2 id="setup-title">Setup Game</h2>
+        <button class="back-btn" onclick="showDashboard()">← Kembali</button><br>
+        <h2 style="color: var(--primary);">Pengaturan Dana</h2>
         <input type="number" id="inp-peserta" placeholder="Jumlah Peserta" value="5">
-        <input type="number" id="inp-budget" placeholder="Total Budget (Rp)" value="500000">
-        <button class="btn-main" onclick="initGame()">MULAI GAME 🚀</button>
+        <input type="number" id="inp-budget" placeholder="Total Budget (Rp)" value="1000000">
+        <button class="btn-main" onclick="initGame()">SIAPKAN HADIAH 🚀</button>
     </div>
 
     <div id="game-angka" class="card" style="display:none;">
-        <h3>Pilih Satu Angka!</h3>
+        <h3>Pilih Angka Keberuntungan!</h3>
         <div class="grid-angka" id="angka-area"></div>
         <div class="recap-container">
-            <table id="recap-angka-table"><thead><tr><th>No</th><th>Hasil THR</th></tr></thead><tbody id="recap-angka-body"></tbody></table>
+            <table><thead><tr><th>No</th><th>Nominal THR</th></tr></thead><tbody id="recap-angka-body"></tbody></table>
         </div>
-        <button class="btn-main" onclick="showDashboard()" style="background:#757575">Keluar</button>
+        <button class="btn-main" onclick="showDashboard()" style="background:#757575; box-shadow: 0 5px #444;">Tutup</button>
     </div>
 
     <div id="game-bar" class="card" style="display:none;">
         <h3 id="info-bar">Giliran Peserta ke-1</h3>
-        <div class="slot-label">Tekan STOP untuk mengunci hadiah!</div>
         <div class="slot-container">
-            <div id="slot-val">Rp0</div>
+            <div id="slot-val">SIAP?</div>
         </div>
-        <button class="btn-main" id="btn-slot" onclick="handleSlot()">ACAK HADIAH 🎰</button>
-        
+        <button class="btn-main" id="btn-slot" onclick="handleSlot()">ACAK SEKARANG 🎰</button>
         <div class="recap-container">
-            <table id="recap-bar-table"><thead><tr><th>Peserta</th><th>Hasil THR</th></tr></thead><tbody id="recap-bar-body"></tbody></table>
+            <h4 style="margin:0 0 10px 0; color:var(--primary);">📊 Log Pemenang:</h4>
+            <table><thead><tr><th>Penerima</th><th>Hasil THR</th></tr></thead><tbody id="recap-bar-body"></tbody></table>
         </div>
-        <button class="btn-main" onclick="showDashboard()" style="background:#757575; margin-top:10px;">Keluar</button>
+        <button class="btn-main" onclick="showDashboard()" style="background:#757575; box-shadow: 0 5px #444; margin-top:15px;">Tutup</button>
     </div>
 </div>
 
-<audio id="snd-click" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
 <audio id="snd-win" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
 
 <script>
     let mode = '';
     let budgetList = [];
+    let fullOriginalList = [];
     let currentParticipant = 1;
     let isRunning = false;
     let slotInterval;
@@ -98,31 +98,40 @@
         document.getElementById('setup').style.display = 'block';
     }
 
+    // FUNGSI SUARA UNIK (Rare Voice)
+    function bicaraEksklusif(teks) {
+        // Menggunakan profil Indonesian Male yang lebih jarang dipakai dan terdengar profesional
+        responsiveVoice.speak(teks, "Indonesian Male", {
+            pitch: 1, 
+            rate: 0.85, 
+            volume: 1
+        });
+    }
+
     function initGame() {
         let jml = parseInt(document.getElementById('inp-peserta').value);
         let budget = parseInt(document.getElementById('inp-budget').value);
-        if(!jml || !budget) return alert("Isi data dulu!");
+        if(!jml || !budget) return alert("Mohon isi data!");
 
-        // Kalkulasi Distribusi
-        let jackpot = Math.round((budget * 0.3) / 1000) * 1000;
+        let jackpot = Math.round((budget * 0.35) / 1000) * 1000;
         let sisa = budget - jackpot;
         let base = Math.floor(sisa / (jml - 1));
         
         budgetList = [jackpot];
         for(let i=0; i < jml - 1; i++){
-            let val = Math.round((base * (0.7 + Math.random() * 0.6)) / 1000) * 1000;
+            let val = Math.round((base * (0.6 + Math.random() * 0.8)) / 1000) * 1000;
             if(val > sisa) val = base;
             budgetList.push(val);
             sisa -= val;
         }
         budgetList[1] += sisa;
         budgetList.sort(() => Math.random() - 0.5);
+        fullOriginalList = [...budgetList];
 
         document.getElementById('setup').style.display = 'none';
         if(mode === 'angka') setupAngka(); else setupBar();
     }
 
-    // --- GAME ANGKA ---
     function setupAngka() {
         document.getElementById('game-angka').style.display = 'block';
         const area = document.getElementById('angka-area');
@@ -137,15 +146,19 @@
         if(el.classList.contains('revealed')) return;
         el.classList.add('revealed');
         el.innerText = format(val);
-        document.getElementById('snd-click').play();
-        if(val === Math.max(...budgetList)) { confetti(); document.getElementById('snd-win').play(); }
+        
+        // Pemicu suara eksklusif
+        bicaraEksklusif(`Selamat. Anda berhak menerima T H R sebesar ${val} rupiah.`);
+        
+        if(val === Math.max(...fullOriginalList)) { 
+            confetti(); 
+            document.getElementById('snd-win').play(); 
+        }
         document.getElementById('recap-angka-body').innerHTML += `<tr><td>${i+1}</td><td>${format(val)}</td></tr>`;
     }
 
-    // --- GAME SLOT BAR (ELIMINASI) ---
     function setupBar() {
         document.getElementById('game-bar').style.display = 'block';
-        document.getElementById('slot-val').innerText = "READY?";
     }
 
     function handleSlot() {
@@ -153,50 +166,45 @@
         const display = document.getElementById('slot-val');
 
         if (!isRunning) {
-            // MULAI ACAK
             isRunning = true;
-            btn.innerText = "STOP! ✋";
+            btn.innerText = "BERHENTI! ✋";
             btn.style.background = "#d32f2f";
-            
             slotInterval = setInterval(() => {
-                let randomTemp = budgetList[Math.floor(Math.random() * budgetList.length)];
-                display.innerText = format(randomTemp);
-            }, 50);
-            
+                let visualTemp = fullOriginalList[Math.floor(Math.random() * fullOriginalList.length)];
+                display.innerText = format(visualTemp);
+            }, 55);
         } else {
-            // BERHENTI (ELIMINASI)
             isRunning = false;
             clearInterval(slotInterval);
             btn.disabled = true;
 
-            // Pilih hasil final dari sisa list
             let winIdx = Math.floor(Math.random() * budgetList.length);
             let winVal = budgetList[winIdx];
             display.innerText = format(winVal);
 
-            // Efek Menang
+            // Pemicu suara eksklusif
+            bicaraEksklusif(`Luar biasa. Peserta ke ${currentParticipant} mendapatkan T H R senilai ${winVal} rupiah.`);
+
             document.getElementById('snd-win').play();
-            confetti({particleCount: 100, spread: 70});
+            confetti({particleCount: 120, spread: 80});
 
-            // Update Rekap
             document.getElementById('recap-bar-body').innerHTML += `<tr><td>Peserta ${currentParticipant}</td><td>${format(winVal)}</td></tr>`;
-
-            // Hapus dari daftar agar tidak muncul lagi
             budgetList.splice(winIdx, 1);
             currentParticipant++;
 
             setTimeout(() => {
                 if (budgetList.length > 0) {
                     btn.disabled = false;
-                    btn.innerText = "LANJUT KE PESERTA BERIKUTNYA 🎰";
+                    btn.innerText = "LANJUTKAN 🎰";
                     btn.style.background = "var(--primary)";
                     document.getElementById('info-bar').innerText = `Giliran Peserta ke-${currentParticipant}`;
                 } else {
                     btn.style.display = 'none';
-                    document.getElementById('info-bar').innerText = "SEMUA SUDAH DAPAT THR!";
-                    display.innerText = "FINISH 🏁";
+                    document.getElementById('info-bar').innerText = "PERMAINAN SELESAI!";
+                    display.innerText = "LUNAS 🏁";
+                    bicaraEksklusif("Seluruh hadiah telah terbagikan. Selamat Idul Fitri.");
                 }
-            }, 1500);
+            }, 2500);
         }
     }
 </script>
