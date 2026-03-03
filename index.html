@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THR Online v22.0 - Stabil & Navigasi Host</title>
+    <title>THR Online v23.0 - Private & Voice Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
@@ -25,8 +25,9 @@
         .game-item { background: #eee; height: 80px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.2em; font-weight: bold; cursor: pointer; border-bottom: 5px solid #ccc; transition: 0.2s; }
         .game-item.selected-by-me { background: #ffd700 !important; border-color: #b8860b; transform: scale(0.95); }
         .game-item.taken { background: #ccc !important; color: #999; cursor: not-allowed; border-bottom: none; }
-        .game-item.revealed { background: white !important; border: 2px solid var(--primary); color: var(--primary); font-size: 0.8em; border-bottom: none; }
-        .slot-window { background: #000; color: var(--gold); height: 100px; display: flex; align-items: center; justify-content: center; font-size: 2.5em; border-radius: 15px; margin: 20px 0; border: 4px solid var(--gold); }
+        .game-item.revealed { background: white !important; border: 2px solid var(--primary); color: var(--primary); font-size: 0.8em; border-bottom: none; animation: pop 0.3s ease-out; }
+        @keyframes pop { 0% { transform: scale(0.8); } 100% { transform: scale(1); } }
+        .slot-window { background: #000; color: var(--gold); height: 120px; display: flex; align-items: center; justify-content: center; font-size: 2.2em; border-radius: 15px; margin: 20px 0; border: 4px solid var(--gold); font-weight: 800; }
         .rolling { animation: blur 0.1s infinite; }
         @keyframes blur { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
         table { width: 100%; font-size: 0.85em; margin-top: 15px; border-collapse: collapse; }
@@ -40,8 +41,8 @@
     <h1 style="color:var(--gold); text-shadow: 2px 2px #000; margin-top: 20px;">🌙 THR SESSION 🌙</h1>
 
     <div id="screen-start" class="card">
-        <button class="btn-main" onclick="goTo('screen-host-setup')">MASUK SEBAGAI HOST</button>
-        <button class="btn-gold" onclick="goTo('screen-part-join')">MASUK SEBAGAI PESERTA</button>
+        <button class="btn-main" onclick="goTo('screen-host-setup')">HOST (YUDI)</button>
+        <button class="btn-gold" onclick="goTo('screen-part-join')">PESERTA</button>
     </div>
 
     <div id="screen-host-setup" class="card" style="display:none;">
@@ -62,20 +63,18 @@
         </select>
         <ul id="host-player-list" class="lobby-list"></ul>
         <button class="btn-main" onclick="startNow()">MULAI GAME 🏁</button>
-        <button class="btn-outline" onclick="backToSetup()">Kembali ke Setup (Ganti Budget)</button>
+        <button class="btn-outline" onclick="goTo('screen-host-setup')">Ganti Budget</button>
     </div>
 
     <div id="screen-part-join" class="card" style="display:none;">
         <input type="text" id="part-name" placeholder="Nama Anda">
         <input type="text" id="part-session-id" placeholder="Kode 4 Digit">
         <button class="btn-main" onclick="joinSession()">GABUNG</button>
-        <button class="btn-outline" onclick="goTo('screen-start')">Kembali</button>
     </div>
 
     <div id="screen-part-lobby" class="card" style="display:none;">
-        <h3>Lobby Room</h3>
+        <h3>Lobby</h3>
         <p>Halo, <strong id="display-my-name">...</strong></p>
-        <p style="font-size:0.8em; color:#666;">Menunggu Host memulai...</p>
         <ul id="part-player-list" class="lobby-list"></ul>
     </div>
 
@@ -83,14 +82,13 @@
         <h3 id="game-title" style="margin:0; color:var(--primary);">Game</h3>
         <div id="game-area"></div>
         
-        <div id="host-controls" style="display:none; margin-top:20px;">
+        <div id="host-ui" style="display:none; margin-top:20px;">
             <button class="btn-gold" onclick="revealAll()">🎁 BUKA SEMUA HADIAH</button>
-            <button class="btn-outline" onclick="resetGameSameSession()">Ulangi Game / Ganti Game</button>
-        </div>
-
-        <div style="margin-top:20px; border-top: 1px solid #eee;">
-            <p style="font-size: 0.8em; font-weight: bold; margin-top:10px;">REKAP PEMENANG:</p>
-            <table id="game-recap"></table>
+            <button class="btn-outline" onclick="resetGameSameSession()">Ulangi Game / Ganti Mode</button>
+            <div style="margin-top:20px; border-top: 1px solid #eee;">
+                <p style="font-size: 0.8em; font-weight: bold; margin-top:10px;">REKAP PESERTA (KHUSUS HOST):</p>
+                <table id="game-recap"></table>
+            </div>
         </div>
     </div>
 </div>
@@ -108,7 +106,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let myName = "", currentSessionId = "", isHost = false, hasSelected = false;
+    let myName = "", currentSessionId = "", isHost = false, hasSelected = false, spoken = false;
 
     function goTo(id) {
         document.querySelectorAll('.card').forEach(c => c.style.display = 'none');
@@ -116,41 +114,20 @@
     }
 
     function createSession() {
-        if(document.getElementById('host-pass').value !== "yudi123") return alert("Password Salah!");
+        if(document.getElementById('host-pass').value !== "yudi123") return alert("Admin Only!");
         isHost = true;
-        if(!currentSessionId) {
-            currentSessionId = Math.floor(1000 + Math.random() * 9000).toString();
-        }
-        updateSessionInDB();
+        if(!currentSessionId) currentSessionId = Math.floor(1000 + Math.random() * 9000).toString();
+        db.ref('active_sessions/' + currentSessionId).update({ status: 'lobby', budget: parseInt(document.getElementById('host-budget').value), showResults: false, selections: null });
         document.getElementById('display-session-id').innerText = currentSessionId;
-        const qrArea = document.getElementById("qr-code");
-        qrArea.innerHTML = "";
-        new QRCode(qrArea, { text: currentSessionId, width: 120, height: 120 });
+        document.getElementById("qr-code").innerHTML = "";
+        new QRCode(document.getElementById("qr-code"), { text: currentSessionId, width: 120, height: 120 });
         goTo('screen-host-lobby');
         listenSesi();
     }
 
-    function updateSessionInDB() {
-        db.ref('active_sessions/' + currentSessionId).update({
-            status: 'lobby',
-            budget: parseInt(document.getElementById('host-budget').value),
-            showResults: false,
-            selections: null
-        });
-    }
-
-    function backToSetup() {
-        goTo('screen-host-setup');
-    }
-
     function resetGameSameSession() {
-        hasSelected = false;
-        db.ref('active_sessions/' + currentSessionId).update({
-            status: 'lobby',
-            showResults: false,
-            selections: null,
-            budgetList: null
-        });
+        spoken = false; hasSelected = false;
+        db.ref('active_sessions/' + currentSessionId).update({ status: 'lobby', showResults: false, selections: null, budgetList: null });
     }
 
     function joinSession() {
@@ -175,13 +152,7 @@
             list.push(jackpot);
             for(let i=0; i<players.length-1; i++) list.push(Math.round((base * (0.8 + Math.random()*0.4))/1000)*1000);
             list.sort(() => Math.random() - 0.5);
-
-            db.ref('active_sessions/' + currentSessionId).update({
-                status: 'playing',
-                gameType: type,
-                budgetList: list,
-                showResults: (type === 'slot')
-            });
+            db.ref('active_sessions/' + currentSessionId).update({ status: 'playing', gameType: type, budgetList: list, showResults: (type === 'slot') });
         });
     }
 
@@ -189,51 +160,34 @@
         db.ref('active_sessions/' + currentSessionId).on('value', snap => {
             const data = snap.val();
             if(!data) return;
-
             const players = data.players ? Object.keys(data.players) : [];
-            document.getElementById(isHost ? 'host-player-list' : 'part-player-list').innerHTML = 
-                players.map(p => `<li class="lobby-item">${p}</li>`).join('');
+            document.getElementById(isHost ? 'host-player-list' : 'part-player-list').innerHTML = players.map(p => `<li class="lobby-item">${p}</li>`).join('');
 
             if(data.status === 'playing') {
                 goTo('screen-game');
                 renderGame(data, players);
             } else if(data.status === 'lobby') {
                 goTo(isHost ? 'screen-host-lobby' : 'screen-part-lobby');
-                hasSelected = false;
             }
         });
     }
 
     function renderGame(data, players) {
         const area = document.getElementById('game-area');
-        const title = document.getElementById('game-title');
-        title.innerText = "GAME: " + data.gameType.toUpperCase();
+        document.getElementById('game-title').innerText = data.gameType.toUpperCase();
         
         if(isHost) {
-            document.getElementById('host-controls').style.display = 'block';
-            area.innerHTML = `<p style="color:var(--primary); font-weight:bold;">Monitoring Peserta...</p>`;
+            document.getElementById('host-ui').style.display = 'block';
+            area.innerHTML = `<p style="color:var(--primary); font-weight:bold;">Sesi ${data.gameType} Sedang Berlangsung...</p>`;
+            renderHostRecap(data, players);
         } else {
-            if(data.gameType === 'slot') renderSlotUI(data);
-            else renderGridUI(data);
+            document.getElementById('host-ui').style.display = 'none';
+            if(data.gameType === 'slot') renderSlotPeserta(data);
+            else renderGridPeserta(data);
         }
-
-        // REKAP TABEL (SINKRONISASI REAL-TIME)
-        const recap = document.getElementById('game-recap');
-        recap.innerHTML = "<tr><th>Nama</th><th>Hasil THR</th></tr>";
-        players.forEach(p => {
-            let winText = "Menunggu...";
-            if(data.selections) {
-                Object.values(data.selections).forEach(sel => {
-                    if(sel.name === p) {
-                        winText = data.showResults ? `Rp${sel.val.toLocaleString()}` : "✅ Sudah Pilih";
-                    }
-                });
-            }
-            recap.innerHTML += `<tr><td>${p}</td><td style="color:var(--primary); font-weight:bold">${winText}</td></tr>`;
-        });
     }
 
-    function renderGridUI(data) {
+    function renderGridPeserta(data) {
         const area = document.getElementById('game-area');
         area.innerHTML = `<div class="grid-game"></div>`;
         const grid = area.querySelector('.grid-game');
@@ -242,17 +196,19 @@
             const claimer = data.selections ? data.selections[i] : null;
             const btn = document.createElement('div');
             
+            let isMine = claimer && claimer.name === myName;
             let status = "";
-            if (data.showResults && claimer) status = "revealed";
-            else if (claimer && claimer.name === myName) status = "selected-by-me";
+            if (data.showResults && isMine) status = "revealed";
+            else if (isMine) status = "selected-by-me";
             else if (claimer) status = "taken";
             
             btn.className = `game-item ${status}`;
             
-            if(data.showResults && claimer) {
+            if(data.showResults && isMine) {
                 btn.innerText = `Rp${val.toLocaleString()}`;
+                playVoice(`Selamat ${myName}, kamu mendapatkan THR sebesar ${val} rupiah!`);
             } else if(claimer) {
-                btn.innerText = (claimer.name === myName) ? "SAYA" : "OK";
+                btn.innerText = isMine ? "SAYA" : "OK";
             } else {
                 btn.innerText = (data.gameType === 'angka') ? i + 1 : "🧧";
             }
@@ -262,17 +218,16 @@
         });
     }
 
-    function renderSlotUI(data) {
+    function renderSlotPeserta(data) {
         const area = document.getElementById('game-area');
         let myRes = null;
-        if(data.selections) {
-            Object.values(data.selections).forEach(s => { if(s.name === myName) myRes = s.val; });
-        }
+        if(data.selections) Object.values(data.selections).forEach(s => { if(s.name === myName) myRes = s.val; });
 
         if(myRes) {
-            area.innerHTML = `<div class="slot-window">💰 Rp${myRes.toLocaleString()}</div><p>Hasil Slot Kamu!</p>`;
+            area.innerHTML = `<div class="slot-window">💰 Rp${myRes.toLocaleString()}</div><p>Hore! Selamat ya!</p>`;
+            playVoice(`Selamat ${myName}, kamu mendapatkan THR sebesar ${myRes} rupiah!`);
         } else {
-            area.innerHTML = `<div id="slot-box" class="slot-window">🎰</div><button class="btn-main" onclick="spinSlot()">SPIN!</button>`;
+            area.innerHTML = `<div id="slot-box" class="slot-window">🎰</div><button class="btn-main" onclick="spinSlot()">SPIN SEKARANG!</button>`;
         }
     }
 
@@ -290,12 +245,35 @@
             let avail = data.budgetList.map((_, i) => i).filter(i => !taken.includes(i));
             let myIdx = avail[Math.floor(Math.random() * avail.length)];
             let myVal = data.budgetList[myIdx];
-
             setTimeout(() => {
                 db.ref(`active_sessions/${currentSessionId}/selections/${myIdx}`).set({ name: myName, val: myVal });
                 confetti();
             }, 2000);
         });
+    }
+
+    function renderHostRecap(data, players) {
+        const recap = document.getElementById('game-recap');
+        recap.innerHTML = "<tr><th>Nama</th><th>Hasil</th></tr>";
+        players.forEach(p => {
+            let win = "Menunggu...";
+            if(data.selections) {
+                Object.values(data.selections).forEach(sel => {
+                    if(sel.name === p) win = data.showResults ? `Rp${sel.val.toLocaleString()}` : "✅ Sudah";
+                });
+            }
+            recap.innerHTML += `<tr><td>${p}</td><td style="color:var(--primary); font-weight:bold">${win}</td></tr>`;
+        });
+    }
+
+    function playVoice(text) {
+        if (!spoken) {
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'id-ID';
+            msg.rate = 0.9;
+            window.speechSynthesis.speak(msg);
+            spoken = true;
+        }
     }
 
     function revealAll() {
