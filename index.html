@@ -3,311 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi THR Keluarga Yudi</title>
+    <title>Aplikasi THR Keluarga Yudi v3.0</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #1b5e20;
-            --gold: #ffd700;
-            --white: #ffffff;
-            --dark: #003300;
-        }
+        :root { --primary: #1b5e20; --gold: #ffd700; --white: #ffffff; }
+        body { font-family: 'Poppins', sans-serif; background: radial-gradient(circle, #1b5e20 0%, #002200 100%); color: var(--white); margin: 0; padding: 0; min-height: 100vh; text-align: center; }
+        
+        /* Animasi Bintang Bergerak */
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/stardust.png'); z-index: -1; animation: moveStars 50s linear infinite; }
+        @keyframes moveStars { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: radial-gradient(circle, #1b5e20 0%, #002200 100%);
-            color: var(--white);
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
+        .container { max-width: 500px; margin: auto; padding: 20px; }
+        .card { background: rgba(255, 255, 255, 0.95); border-radius: 25px; padding: 20px; color: #333; box-shadow: 0 15px 35px rgba(0,0,0,0.4); margin-top: 20px; animation: zoomIn 0.5s ease; }
+        
+        /* Dashboard */
+        .menu-item { background: linear-gradient(135deg, var(--primary), #003300); color: var(--gold); padding: 20px; border-radius: 15px; cursor: pointer; margin-bottom: 15px; border: 2px solid var(--gold); font-weight: 600; transition: 0.3s; }
+        .menu-item:hover { transform: scale(1.05); }
 
-        /* Animasi Background */
-        .stars {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/stardust.png');
-            z-index: -1;
-            animation: moveStars 50s linear infinite;
-        }
+        /* Roda Berputar (Wheel) */
+        .wheel-container { position: relative; width: 250px; height: 250px; margin: 20px auto; border: 5px solid var(--gold); border-radius: 50%; overflow: hidden; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
+        .wheel-pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #d32f2f; z-index: 10; }
+        canvas { width: 100%; height: 100%; }
 
-        @keyframes moveStars {
-            from { background-position: 0 0; }
-            to { background-position: 1000px 1000px; }
-        }
+        /* Mystery Box */
+        .grid-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .box { background: var(--gold); height: 80px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2em; cursor: pointer; border-bottom: 5px solid #b8860b; }
+        .box.opened { background: #ddd; border: none; font-size: 0.7em; font-weight: bold; color: var(--primary); }
 
-        .container {
-            max-width: 500px;
-            margin: auto;
-            padding: 20px;
-            text-align: center;
-        }
-
-        h1 {
-            color: var(--gold);
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-            font-weight: 800;
-            margin-top: 30px;
-            animation: fadeInDown 1s ease;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 25px;
-            padding: 20px;
-            color: #333;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            margin-top: 20px;
-            animation: zoomIn 0.8s ease;
-        }
-
-        /* Dashboard Styles */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .menu-item {
-            background: linear-gradient(135deg, var(--primary), var(--dark));
-            color: var(--gold);
-            padding: 25px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: 0.3s;
-            border: 2px solid var(--gold);
-            font-weight: 600;
-            font-size: 1.2em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .menu-item:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-        }
-
-        /* Form Styles */
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #ddd;
-            border-radius: 12px;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-
-        .btn-main {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 15px;
-            width: 100%;
-            border-radius: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        /* Game Grids */
-        .game-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .item {
-            background: #eee;
-            height: 80px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            border-bottom: 4px solid #ccc;
-        }
-
-        .item.revealed {
-            background: var(--white) !important;
-            border-bottom: none;
-            transform: rotateY(360deg);
-        }
-
-        .jackpot {
-            background: var(--gold) !important;
-            color: #d32f2f !important;
-            animation: pulse 0.5s infinite alternate;
-        }
-
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
-        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        /* Utility */
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        .btn-action { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .back-btn { background: #757575; color: white; border: none; padding: 5px 15px; border-radius: 5px; float: left; cursor: pointer; }
         @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-
-        .recap-table {
-            width: 100%; margin-top: 20px; border-collapse: collapse; font-size: 0.8em;
-        }
-        .recap-table th, td { border: 1px solid #ddd; padding: 8px; }
-
-        .back-btn {
-            background: #757575; color: white; border: none; padding: 8px 15px;
-            border-radius: 8px; margin-bottom: 15px; cursor: pointer; float: left;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.8em; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
     </style>
 </head>
 <body>
 
-    <div class="stars"></div>
+<div class="stars"></div>
+<div class="container">
+    <h1 style="color:var(--gold); margin-top:40px;">🌙 EID MUBARAK 🌙</h1>
 
-    <div class="container">
-        <h1>🌙 EID MUBARAK 🌙</h1>
-        <p style="color: var(--gold); font-weight: 600;">Aplikasi Bagi THR Yudi v2.0</p>
-
-        <div id="dashboard" class="card">
-            <h2>Pilih Game Seru</h2>
-            <div class="menu-grid">
-                <div class="menu-item" onclick="showSetup('angka')">
-                    🔢 Tebak Angka Keberuntungan
-                </div>
-                <div class="menu-item" onclick="showSetup('box')">
-                    📦 Mystery Box Idul Fitri
-                </div>
-            </div>
-            <p style="font-size: 0.8em; margin-top: 20px; color: #666;">Silakan pilih mode permainan untuk memulai</p>
-        </div>
-
-        <div id="setup-screen" class="card" style="display: none;">
-            <button class="back-btn" onclick="showDashboard()">← Kembali</button>
-            <h2 id="setup-title">Konfigurasi Game</h2>
-            <input type="number" id="total-peserta" placeholder="Jumlah Peserta" value="7">
-            <input type="number" id="total-budget" placeholder="Total Budget (Rp)" value="500000">
-            <button class="btn-main" onclick="startGame()">Mulai Sekarang 🚀</button>
-        </div>
-
-        <div id="game-screen" class="card" style="display: none;">
-            <div id="budget-info" style="font-weight: bold; color: var(--primary); margin-bottom: 10px;">
-                Sisa Budget: <span id="sisa-val">0</span>
-            </div>
-            <div id="game-area" class="game-grid"></div>
-            
-            <div style="margin-top:20px; text-align: left;">
-                <h4 style="margin: 5px 0;">📊 Rekap Pemenang:</h4>
-                <table class="recap-table">
-                    <thead><tr><th>No</th><th>Hasil</th><th>Status</th></tr></thead>
-                    <tbody id="recap-body"></tbody>
-                </table>
-            </div>
-            <button class="btn-main" onclick="showDashboard()" style="background:#757575;">Selesai & Keluar</button>
-        </div>
+    <div id="dashboard" class="card">
+        <h2>Pilih Game THR</h2>
+        <div class="menu-item" onclick="openSetup('wheel')">🎡 Roda Berputar (Spin)</div>
+        <div class="menu-item" onclick="openSetup('box')">🎁 Mystery Box (Keberuntungan)</div>
     </div>
 
-    <audio id="snd-open" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
-    <audio id="snd-win" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+    <div id="setup" class="card" style="display:none;">
+        <button class="back-btn" onclick="showHome()">← Menu</button><br><br>
+        <h2 id="setup-title">Setup</h2>
+        <input type="number" id="inp-peserta" placeholder="Jumlah Peserta" value="6">
+        <input type="number" id="inp-budget" placeholder="Total Budget (Rp)" value="500000">
+        <button class="btn-action" onclick="initGame()">MULAI PERMAINAN</button>
+    </div>
+
+    <div id="game-wheel" class="card" style="display:none;">
+        <div id="wheel-status">Klik "Putar" untuk menentukan hadiah!</div>
+        <div class="wheel-pointer"></div>
+        <div class="wheel-container" id="wheel-el">
+            <canvas id="canvas"></canvas>
+        </div>
+        <button class="btn-action" id="btn-spin" onclick="spinWheel()">PUTAR RODA 🎡</button>
+        <div id="recap-wheel"></div>
+    </div>
+
+    <div id="game-box" class="card" style="display:none;">
+        <div id="box-status">Pilih kotak misteri kamu!</div><br>
+        <div class="grid-box" id="box-area"></div>
+        <div id="recap-box"></div>
+        <button class="btn-action" onclick="showHome()" style="background:#757575">Selesai</button>
+    </div>
+</div>
+
+<audio id="snd-click" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+<audio id="snd-win" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
 
 <script>
-    let currentGameMode = '';
-    let boxValues = [];
-    let jackpotIndex = -1;
-    let sisaBudget = 0;
+    let mode = '';
+    let participants = [];
+    let budgetArr = [];
+    let isSpinning = false;
 
-    function formatIDR(val) {
-        return "Rp" + new Intl.NumberFormat('id-ID').format(val);
-    }
-
-    function showDashboard() {
-        document.getElementById('dashboard').style.display = 'block';
-        document.getElementById('setup-screen').style.display = 'none';
-        document.getElementById('game-screen').style.display = 'none';
-    }
-
-    function showSetup(mode) {
-        currentGameMode = mode;
-        document.getElementById('setup-title').innerText = mode === 'angka' ? 'Setup Tebak Angka' : 'Setup Mystery Box';
+    function format(v) { return "Rp" + new Intl.NumberFormat('id-ID').format(v); }
+    function showHome() { location.reload(); }
+    function openSetup(m) {
+        mode = m;
         document.getElementById('dashboard').style.display = 'none';
-        document.getElementById('setup-screen').style.display = 'block';
+        document.getElementById('setup').style.display = 'block';
+        document.getElementById('setup-title').innerText = m === 'wheel' ? '🎡 Setup Roda Berputar' : '🎁 Setup Mystery Box';
     }
 
-    function startGame() {
-        const jml = parseInt(document.getElementById('total-peserta').value);
-        const budget = parseInt(document.getElementById('total-budget').value);
+    function initGame() {
+        const jml = parseInt(document.getElementById('inp-peserta').value);
+        const budget = parseInt(document.getElementById('inp-budget').value);
         if(!jml || !budget) return alert("Isi data!");
 
-        sisaBudget = budget;
-        document.getElementById('sisa-val').innerText = formatIDR(budget);
+        // Algoritma Pembagian THR
+        let jackpotIdx = Math.floor(Math.random() * jml);
+        let jackpotVal = Math.round((budget * 0.35) / 1000) * 1000;
+        let sisa = budget - jackpotVal;
+        let base = Math.floor(sisa / (jml-1));
         
-        // Algoritma Smart Jackpot (25-40%)
-        jackpotIndex = Math.floor(Math.random() * jml);
-        let jackpotVal = Math.round((budget * (0.25 + Math.random() * 0.15)) / 1000) * 1000;
-        let sisaUang = budget - jackpotVal;
-        let perOrangBase = Math.floor(sisaUang / (jml - 1));
-
-        boxValues = [];
+        budgetArr = [];
         for(let i=0; i<jml; i++) {
-            if(i === jackpotIndex) {
-                boxValues[i] = jackpotVal;
-            } else {
-                let factor = currentGameMode === 'box' ? (0.5 + Math.random()) : (0.8 + Math.random() * 0.4);
-                let val = Math.round((perOrangBase * factor) / 1000) * 1000;
-                if(val > sisaUang) val = perOrangBase;
-                boxValues[i] = val;
-                sisaUang -= val;
+            if(i === jackpotIdx) budgetArr[i] = jackpotVal;
+            else {
+                let val = Math.round((base * (0.6 + Math.random() * 0.8)) / 1000) * 1000;
+                if(val > sisa) val = base;
+                budgetArr[i] = val; sisa -= val;
             }
         }
-        
-        // Koreksi budget pas
-        if(sisaUang !== 0) boxValues[jackpotIndex === 0 ? 1 : 0] += sisaUang;
+        budgetArr[0] += sisa; // Koreksi sisa akhir
 
-        renderGame(jml);
-        document.getElementById('setup-screen').style.display = 'none';
-        document.getElementById('game-screen').style.display = 'block';
+        document.getElementById('setup').style.display = 'none';
+        if(mode === 'wheel') setupWheel(jml); else setupBox(jml);
     }
 
-    function renderGame(jml) {
-        const area = document.getElementById('game-area');
+    // --- LOGIC GAME BOX ---
+    function setupBox(jml) {
+        document.getElementById('game-box').style.display = 'block';
+        const area = document.getElementById('box-area');
         area.innerHTML = "";
-        document.getElementById('recap-body').innerHTML = "";
-        
-        for(let i=0; i<jml; i++) {
-            const content = currentGameMode === 'angka' ? (i+1) : '📦';
-            area.innerHTML += `
-                <div class="item" id="item-${i}" onclick="reveal(${i})">
-                    ${content}
-                </div>
-            `;
+        budgetArr.sort(() => Math.random() - 0.5); // Acak posisi
+        budgetArr.forEach((val, i) => {
+            area.innerHTML += `<div class="box" id="bx-${i}" onclick="openBox(${i}, ${val})">📦</div>`;
+        });
+    }
+
+    function openBox(i, val) {
+        const el = document.getElementById('bx-' + i);
+        if(el.classList.contains('opened')) return;
+        el.classList.add('opened');
+        el.innerText = format(val);
+        document.getElementById('snd-click').play();
+        if(val === Math.max(...budgetArr)) {
+            confetti({particleCount: 150});
+            document.getElementById('snd-win').play();
         }
     }
 
-    function reveal(idx) {
-        const el = document.getElementById('item-' + idx);
-        if(el.classList.contains('revealed')) return;
+    // --- LOGIC GAME WHEEL ---
+    function setupWheel(jml) {
+        document.getElementById('game-wheel').style.display = 'block';
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 250; canvas.height = 250;
+        const arc = (Math.PI * 2) / jml;
 
-        const val = boxValues[idx];
-        el.classList.add('revealed');
-        el.innerText = formatIDR(val);
+        budgetArr.sort(() => Math.random() - 0.5);
+        budgetArr.forEach((val, i) => {
+            ctx.fillStyle = i % 2 === 0 ? "#1b5e20" : "#ffd700";
+            ctx.beginPath(); ctx.moveTo(125, 125);
+            ctx.arc(125, 125, 125, i * arc, (i + 1) * arc);
+            ctx.fill();
+            ctx.save(); ctx.translate(125, 125); ctx.rotate(i * arc + arc/2);
+            ctx.fillStyle = i % 2 === 0 ? "white" : "black";
+            ctx.fillText(i+1, 80, 5); ctx.restore();
+        });
+    }
 
-        if(idx === jackpotIndex) {
-            el.classList.add('jackpot');
-            document.getElementById('snd-win').play().catch(()=>{});
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        } else {
-            document.getElementById('snd-open').play().catch(()=>{});
-        }
-
-        const row = document.createElement('tr');
-        if(idx === jackpotIndex) row.style.background = "#fff9c4";
-        row.innerHTML = `<td>${idx+1}</td><td>${formatIDR(val)}</td><td>${idx === jackpotIndex ? 'JACKPOT 🎉' : 'Biasa'}</td>`;
-        document.getElementById('recap-body').appendChild(row);
-
-        sisaBudget -= val;
-        document.getElementById('sisa-val').innerText = formatIDR(Math.max(0, sisaBudget));
+    function spinWheel() {
+        if(isSpinning) return;
+        isSpinning = true;
+        const wheel = document.getElementById('wheel-el');
+        const randDeg = Math.floor(Math.random() * 360) + 3600; 
+        wheel.style.transform = `rotate(${randDeg}deg)`;
+        
+        setTimeout(() => {
+            isSpinning = false;
+            confetti(); document.getElementById('snd-win').play();
+            alert("Selamat! Hadiah sudah ditentukan sesuai jarum roda!");
+        }, 4000);
     }
 </script>
 </body>
