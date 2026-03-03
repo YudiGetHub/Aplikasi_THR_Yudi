@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi THR Keluarga Yudi v10.0</title>
+    <title>THR Online Keluarga Yudi v13.0</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -12,206 +14,228 @@
         .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/stardust.png'); z-index: -1; animation: moveStars 50s linear infinite; }
         @keyframes moveStars { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
         .container { max-width: 500px; margin: auto; padding: 20px; text-align: center; }
-        .card { background: rgba(255, 255, 255, 0.95); border-radius: 25px; padding: 20px; color: #333; box-shadow: 0 15px 35px rgba(0,0,0,0.4); margin-top: 20px; animation: zoomIn 0.5s ease; border: 1px solid var(--gold); }
-        .menu-item { background: linear-gradient(135deg, var(--primary), #003300); color: var(--gold); padding: 18px; border-radius: 15px; cursor: pointer; margin-bottom: 15px; border: 2px solid var(--gold); font-weight: 600; transition: 0.3s; }
-        
-        /* Game 1: Angka */
+        .card { background: rgba(255, 255, 255, 0.95); border-radius: 25px; padding: 20px; color: #333; box-shadow: 0 15px 35px rgba(0,0,0,0.4); margin-top: 20px; border: 1px solid var(--gold); }
+        .menu-item { background: linear-gradient(135deg, var(--primary), #003300); color: var(--gold); padding: 18px; border-radius: 15px; cursor: pointer; margin-bottom: 15px; border: 2px solid var(--gold); font-weight: 600; }
         .grid-angka { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .num-btn { background: #eee; height: 70px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; font-weight: bold; cursor: pointer; border-bottom: 5px solid #ccc; }
         .num-btn.revealed { background: var(--white); border: 2px solid var(--primary); font-size: 0.8em; color: var(--primary); transform: rotateY(360deg); transition: 0.8s; }
-
-        /* Game 2: Bar */
         .slot-container { background: #111; padding: 20px; border-radius: 15px; border: 4px solid var(--gold); margin: 15px 0; height: 90px; display: flex; align-items: center; justify-content: center; }
         #slot-val { color: var(--gold); font-size: 1.8em; font-weight: 800; }
-
-        /* Game 3: Pancing Amplop (Fishing) */
         .fishing-area { position: relative; width: 100%; height: 300px; background: #e3f2fd; border-radius: 15px; overflow: hidden; border: 2px dashed var(--primary); margin: 15px 0; }
-        .envelope { position: absolute; font-size: 2.5em; cursor: pointer; transition: all 0.5s linear; user-select: none; }
-
+        .envelope { position: absolute; font-size: 2.5em; cursor: pointer; transition: all 0.5s linear; }
         input { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; }
         .btn-main { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1.1em; box-shadow: 0 5px #003300; }
         .back-btn { background: #757575; color: white; border: none; padding: 6px 15px; border-radius: 8px; float: left; cursor: pointer; margin-bottom: 10px; }
         .recap-container { margin-top: 20px; max-height: 200px; overflow-y: auto; background: #fff; border-radius: 15px; padding: 10px; border: 1px solid #ddd; font-size: 0.85em; }
         table { width: 100%; border-collapse: collapse; }
         th, td { border-bottom: 1px solid #f0f0f0; padding: 10px; text-align: center; }
-        @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        .admin-section { border-top: 2px solid #eee; margin-top: 15px; padding-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="stars"></div>
 <div class="container">
-    <h1 style="color:var(--gold); margin-top:30px; text-shadow: 2px 2px #000;">🌙 EID MUBARAK 🌙</h1>
+    <h1 style="color:var(--gold); margin-top:30px; text-shadow: 2px 2px #000;">🌙 THR ONLINE 🌙</h1>
 
     <div id="dashboard" class="card">
-        <h2 style="color: var(--primary);">Pilih Game THR</h2>
-        <div class="menu-item" onclick="openSetup('angka')">🔢 Tebak Angka</div>
-        <div class="menu-item" onclick="openSetup('bar')">🎰 Slot Bar (Shuffle)</div>
-        <div class="menu-item" onclick="openSetup('pancing')">🎣 Pancing Amplop</div>
-        <p style="font-size: 0.7em; color: #888;">Audio & Animasi Aktif ✅</p>
+        <h2 style="color: var(--primary);">Menu Game</h2>
+        <div class="menu-item" onclick="openGame('angka')">🔢 Tebak Angka</div>
+        <div class="menu-item" onclick="openGame('bar')">🎰 Slot Bar</div>
+        <div class="menu-item" onclick="openGame('pancing')">🎣 Pancing Amplop</div>
+        
+        <div class="admin-section">
+            <p style="font-size: 0.8em; margin:0;">Khusus Yudi:</p>
+            <button onclick="document.getElementById('setup').style.display='block'; document.getElementById('dashboard').style.display='none';" style="font-size: 0.7em; background: none; border: 1px solid #ccc; cursor: pointer; border-radius: 5px;">Pengaturan Host</button>
+        </div>
+        <p style="font-size: 0.7em; color: #d32f2f; margin-top:10px;">Status: <span id="db-status">Checking...</span></p>
     </div>
 
     <div id="setup" class="card" style="display:none;">
         <button class="back-btn" onclick="showDashboard()">← Menu</button><br>
-        <h2 style="color: var(--primary);">Pengaturan</h2>
+        <h2 style="color: var(--primary);">Host Settings</h2>
+        <input type="password" id="admin-pass" placeholder="Password Admin">
         <input type="number" id="inp-peserta" placeholder="Jumlah Peserta" value="5">
-        <input type="number" id="inp-budget" placeholder="Total Budget (Rp)" value="1000000">
-        <button class="btn-main" onclick="initGame()">MULAI GAME 🚀</button>
+        <input type="number" id="inp-budget" placeholder="Total Budget (Rp)" value="500000">
+        <button class="btn-main" onclick="initGameOnline()">RESET & SHARE GAME 🚀</button>
     </div>
 
     <div id="game-angka" class="card" style="display:none;">
-        <h3>Pilih Angka!</h3>
+        <button class="back-btn" onclick="showDashboard()">← Menu</button><br>
+        <h3>Klik Angka!</h3>
         <div class="grid-angka" id="angka-area"></div>
         <div class="recap-container"><table><thead><tr><th>No</th><th>Hasil</th></tr></thead><tbody id="recap-angka-body"></tbody></table></div>
-        <button class="btn-main" onclick="showDashboard()" style="background:#757575;">Tutup</button>
     </div>
 
     <div id="game-bar" class="card" style="display:none;">
-        <h3 id="info-bar">Giliran Peserta ke-1</h3>
-        <div class="slot-container"><div id="slot-val">READY?</div></div>
-        <button class="btn-main" id="btn-slot" onclick="handleSlot()">ACAK 🎰</button>
-        <div class="recap-container"><table><thead><tr><th>Penerima</th><th>Hasil</th></tr></thead><tbody id="recap-bar-body"></tbody></table></div>
-        <button class="btn-main" onclick="showDashboard()" style="background:#757575; margin-top:10px;">Tutup</button>
+        <button class="back-btn" onclick="showDashboard()">← Menu</button><br>
+        <h3 id="info-bar">Giliran Peserta</h3>
+        <div class="slot-container"><div id="slot-val">...</div></div>
+        <button class="btn-main" id="btn-slot" onclick="handleSlotOnline()">KLIK UNTUK ACAK 🎰</button>
+        <div class="recap-container"><table><thead><tr><th>Peserta</th><th>Hasil</th></tr></thead><tbody id="recap-bar-body"></tbody></table></div>
     </div>
 
     <div id="game-pancing" class="card" style="display:none;">
-        <h3 id="info-pancing">Klik amplop untuk menangkap!</h3>
+        <button class="back-btn" onclick="showDashboard()">← Menu</button><br>
+        <h3>Tangkap Amplop!</h3>
         <div class="fishing-area" id="fishing-area"></div>
         <div class="recap-container"><table><thead><tr><th>Penerima</th><th>Hasil</th></tr></thead><tbody id="recap-pancing-body"></tbody></table></div>
-        <button class="btn-main" onclick="showDashboard()" style="background:#757575; margin-top:10px;">Tutup</button>
     </div>
 </div>
 
-<audio id="snd-win" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
-
 <script>
-    let mode = '';
-    let budgetList = [];
-    let fullOriginalList = [];
-    let currentParticipant = 1;
+    const firebaseConfig = {
+        apiKey: "AIzaSyAKuKWKtrcCnZdBPDo3X41Xv5ydKYSaSEs",
+        authDomain: "thr-yudi.firebaseapp.com",
+        databaseURL: "https://thr-yudi-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "thr-yudi",
+        storageBucket: "thr-yudi.firebasestorage.app",
+        messagingSenderId: "118870501569",
+        appId: "1:118870501569:web:b951a0eb7bde9ce026cc40",
+        measurementId: "G-14KF5RB2QG"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     let isRunning = false;
     let slotInterval;
-    let fishingInterval;
+    let currentMode = '';
 
     function format(v) { return "Rp" + new Intl.NumberFormat('id-ID').format(v); }
-    function showDashboard() { location.reload(); }
+    function showDashboard() { 
+        document.querySelectorAll('.card').forEach(c => c.style.display='none');
+        document.getElementById('dashboard').style.display='block';
+    }
     
-    function openSetup(m) {
-        mode = m;
-        document.getElementById('dashboard').style.display = 'none';
-        document.getElementById('setup').style.display = 'block';
+    function openGame(m) {
+        currentMode = m;
+        // Hanya berpindah tampilan, sinkronisasi data dilakukan via .on('value')
     }
 
-    function bicara(teks) {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(teks);
-            msg.lang = 'id-ID';
-            msg.rate = 0.85;
-            window.speechSynthesis.speak(msg);
-        }
+    function bicara(teks) { 
+        if ('speechSynthesis' in window) { 
+            window.speechSynthesis.cancel(); 
+            const msg = new SpeechSynthesisUtterance(teks); 
+            msg.lang = 'id-ID'; 
+            window.speechSynthesis.speak(msg); 
+        } 
     }
 
-    function initGame() {
+    db.ref(".info/connected").on("value", (snap) => {
+        document.getElementById('db-status').innerText = snap.val() ? "Aktif 🟢" : "Terputus 🔴";
+    });
+
+    function initGameOnline() {
+        const pass = document.getElementById('admin-pass').value;
+        if(pass !== "yudi123") return alert("Password Salah!"); // Ganti password sesukamu
+
         let jml = parseInt(document.getElementById('inp-peserta').value);
         let budget = parseInt(document.getElementById('inp-budget').value);
-        if(!jml || !budget) return alert("Isi data!");
-
+        let list = [];
         let jackpot = Math.round((budget * 0.3) / 1000) * 1000;
         let sisa = budget - jackpot;
         let base = Math.floor(sisa / (jml - 1));
-        
-        budgetList = [jackpot];
-        for(let i=0; i < jml - 1; i++){
-            let val = Math.round((base * (0.7 + Math.random() * 0.6)) / 1000) * 1000;
-            if(val > sisa) val = base;
-            budgetList.push(val);
-            sisa -= val;
-        }
-        budgetList[1] += sisa;
-        budgetList.sort(() => Math.random() - 0.5);
-        fullOriginalList = [...budgetList];
+        list.push(jackpot);
+        for(let i=0; i < jml - 1; i++){ list.push(Math.round((base * (0.8 + Math.random() * 0.4)) / 1000) * 1000); }
+        list.sort(() => Math.random() - 0.5);
 
-        document.getElementById('setup').style.display = 'none';
-        if(mode === 'angka') setupAngka(); 
-        else if(mode === 'bar') setupBar();
-        else setupPancing();
+        db.ref('gameState').set({
+            mode: 'ready', // trigger untuk balik ke dashboard di semua HP
+            budgetList: list,
+            fullOriginalList: list,
+            revealed: {},
+            history: [],
+            currentParticipant: 1
+        });
+        alert("Game berhasil di-reset!");
+        showDashboard();
     }
 
-    // --- LOGIC GAME 1: ANGKA ---
-    function setupAngka() {
-        document.getElementById('game-angka').style.display = 'block';
-        const area = document.getElementById('angka-area');
-        budgetList.forEach((val, i) => {
-            area.innerHTML += `<div class="num-btn" id="nb-${i}" onclick="revealAngka(${i}, ${val})">${i+1}</div>`;
+    db.ref('gameState').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if(!data) return;
+
+        // Render Data Berdasarkan Mode yang sedang dibuka User
+        renderAngka(data);
+        renderBar(data);
+        renderPancing(data);
+    });
+
+    function renderAngka(data) {
+        const area = document.getElementById('angka-area'); area.innerHTML = "";
+        const tbody = document.getElementById('recap-angka-body'); tbody.innerHTML = "";
+        if(!data.fullOriginalList) return;
+
+        data.fullOriginalList.forEach((val, i) => {
+            const isOpened = data.revealed && data.revealed[i];
+            const btn = document.createElement('div');
+            btn.className = `num-btn ${isOpened ? 'revealed' : ''}`;
+            btn.innerText = isOpened ? format(val) : i + 1;
+            btn.onclick = () => { 
+                if(!isOpened) {
+                    db.ref(`gameState/revealed/${i}`).set(true);
+                    bicara(`Angka ${i+1} berisi ${val} rupiah.`);
+                    confetti();
+                }
+            };
+            area.appendChild(btn);
+            if(isOpened) tbody.innerHTML += `<tr><td>#${i+1}</td><td>${format(val)}</td></tr>`;
         });
     }
-    function revealAngka(i, val) {
-        const el = document.getElementById('nb-' + i);
-        if(el.classList.contains('revealed')) return;
-        el.classList.add('revealed'); el.innerText = format(val);
-        bicara(`Selamat. Anda mendapatkan ${val} rupiah.`);
-        if(val === Math.max(...fullOriginalList)) { confetti(); document.getElementById('snd-win').play(); }
-        document.getElementById('recap-angka-body').innerHTML += `<tr><td>${i+1}</td><td>${format(val)}</td></tr>`;
+
+    function renderBar(data) {
+        const tbody = document.getElementById('recap-bar-body'); tbody.innerHTML = "";
+        (data.history || []).forEach((v, i) => tbody.innerHTML += `<tr><td>Peserta ${i+1}</td><td>${format(v)}</td></tr>`);
+        document.getElementById('info-bar').innerText = `Giliran Peserta ke-${data.currentParticipant}`;
     }
 
-    // --- LOGIC GAME 2: BAR ---
-    function setupBar() { document.getElementById('game-bar').style.display = 'block'; }
-    function handleSlot() {
-        const btn = document.getElementById('btn-slot');
+    function handleSlotOnline() {
+        if(isRunning) return;
+        isRunning = true;
         const display = document.getElementById('slot-val');
-        if (!isRunning) {
-            isRunning = true; btn.innerText = "STOP!";
-            slotInterval = setInterval(() => {
-                display.innerText = format(fullOriginalList[Math.floor(Math.random() * fullOriginalList.length)]);
-            }, 60);
-        } else {
-            isRunning = false; clearInterval(slotInterval);
-            let winIdx = Math.floor(Math.random() * budgetList.length);
-            let winVal = budgetList[winIdx];
-            display.innerText = format(winVal);
-            bicara(`Peserta ${currentParticipant} mendapatkan ${winVal} rupiah.`);
-            document.getElementById('snd-win').play(); confetti();
-            document.getElementById('recap-bar-body').innerHTML += `<tr><td>Peserta ${currentParticipant}</td><td>${format(winVal)}</td></tr>`;
-            budgetList.splice(winIdx, 1); currentParticipant++;
-            btn.disabled = true;
-            setTimeout(() => { 
-                if(budgetList.length > 0) { btn.disabled = false; btn.innerText = "LANJUT"; }
-                else { btn.innerText = "HABIS"; }
-            }, 2000);
-        }
+        slotInterval = setInterval(() => { display.innerText = "Rp" + Math.floor(Math.random() * 999999); }, 60);
+        
+        setTimeout(() => {
+            clearInterval(slotInterval);
+            isRunning = false;
+            db.ref('gameState').once('value', (snap) => {
+                let d = snap.val(); let list = d.budgetList; if(!list || list.length === 0) return alert("Habis!");
+                let winIdx = Math.floor(Math.random() * list.length); let winVal = list[winIdx];
+                list.splice(winIdx, 1); let hist = d.history || []; hist.push(winVal);
+                db.ref('gameState').update({ budgetList: list, history: hist, currentParticipant: d.currentParticipant + 1 });
+                display.innerText = format(winVal);
+                bicara(`Dapat ${winVal} rupiah.`); confetti();
+            });
+        }, 2000);
     }
 
-    // --- LOGIC GAME 3: PANCING ---
-    function setupPancing() {
-        document.getElementById('game-pancing').style.display = 'block';
-        const area = document.getElementById('fishing-area');
-        for(let i=0; i<budgetList.length; i++) {
+    function renderPancing(data) {
+        const area = document.getElementById('fishing-area'); area.innerHTML = "";
+        const tbody = document.getElementById('recap-pancing-body'); tbody.innerHTML = "";
+        const list = data.budgetList || [];
+        list.forEach((val, i) => {
             const env = document.createElement('div');
             env.className = 'envelope'; env.innerHTML = '✉️';
-            env.style.left = Math.random() * 80 + '%';
-            env.style.top = Math.random() * 80 + '%';
-            env.onclick = () => catchEnvelope(env);
+            env.style.left = (Math.random() * 80) + '%'; env.style.top = (Math.random() * 80) + '%';
+            env.onclick = () => {
+                db.ref('gameState').once('value', snap => {
+                    let d = snap.val(); let currentList = d.budgetList;
+                    let v = currentList.splice(i, 1)[0];
+                    let hist = d.history || []; hist.push(v);
+                    db.ref('gameState').update({ budgetList: currentList, history: hist });
+                    bicara(`Dapat ${v} rupiah!`); confetti();
+                });
+            };
             area.appendChild(env);
-        }
-        fishingInterval = setInterval(() => {
-            document.querySelectorAll('.envelope').forEach(en => {
-                en.style.left = Math.random() * 80 + '%';
-                en.style.top = Math.random() * 80 + '%';
-            });
-        }, 800);
+        });
+        (data.history || []).forEach((v, i) => tbody.innerHTML += `<tr><td>#${i+1}</td><td>${format(v)}</td></tr>`);
     }
-    function catchEnvelope(el) {
-        if(budgetList.length === 0) return;
-        let winIdx = Math.floor(Math.random() * budgetList.length);
-        let winVal = budgetList[winIdx];
-        el.innerHTML = '💰'; el.style.pointerEvents = 'none';
-        bicara(`Keren! Anda memancing hadiah sebesar ${winVal} rupiah.`);
-        document.getElementById('snd-win').play(); confetti();
-        document.getElementById('recap-pancing-body').innerHTML += `<tr><td>Pancingan ${currentParticipant}</td><td>${format(winVal)}</td></tr>`;
-        budgetList.splice(winIdx, 1); currentParticipant++;
-        setTimeout(() => el.remove(), 1000);
-        if(budgetList.length === 0) clearInterval(fishingInterval);
+
+    // Navigasi Game
+    window.openGame = function(m) {
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('game-' + m).style.display = 'block';
     }
 </script>
 </body>
