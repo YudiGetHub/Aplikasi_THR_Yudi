@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi THR Keluarga Yudi v4.0</title>
+    <title>Aplikasi THR Keluarga Yudi v5.0</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -14,25 +14,25 @@
         .container { max-width: 500px; margin: auto; padding: 20px; text-align: center; }
         .card { background: rgba(255, 255, 255, 0.95); border-radius: 25px; padding: 20px; color: #333; box-shadow: 0 15px 35px rgba(0,0,0,0.4); margin-top: 20px; animation: zoomIn 0.5s ease; }
         .menu-item { background: linear-gradient(135deg, var(--primary), #003300); color: var(--gold); padding: 20px; border-radius: 15px; cursor: pointer; margin-bottom: 15px; border: 2px solid var(--gold); font-weight: 600; transition: 0.3s; }
-        .menu-item:hover { transform: scale(1.02); }
         
         /* Game Angka Grid */
         .grid-angka { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .num-btn { background: #eee; height: 70px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; font-weight: bold; cursor: pointer; border-bottom: 5px solid #ccc; transition: 0.3s; }
-        .num-btn.revealed { background: var(--white); border: none; font-size: 0.8em; color: var(--primary); transform: rotateY(360deg); }
+        .num-btn { background: #eee; height: 70px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; font-weight: bold; cursor: pointer; border-bottom: 5px solid #ccc; }
+        .num-btn.revealed { background: var(--white); border: none; font-size: 0.85em; color: var(--primary); transform: rotateY(360deg); transition: 0.6s; }
 
-        /* Wheel Area */
-        .wheel-box { position: relative; width: 300px; height: 300px; margin: 20px auto; }
-        .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #d32f2f; z-index: 10; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)); }
-        #canvas { width: 100%; height: 100%; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); border-radius: 50%; border: 5px solid var(--gold); }
+        /* Slot Bar Area */
+        .slot-container { background: #333; padding: 20px; border-radius: 15px; border: 4px solid var(--gold); margin: 20px 0; position: relative; overflow: hidden; height: 100px; display: flex; align-items: center; justify-content: center; }
+        #slot-val { color: var(--gold); font-size: 2.2em; font-weight: 800; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+        .slot-label { font-size: 0.8em; color: #aaa; margin-bottom: 5px; }
 
         input { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        .btn-main { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1.1em; }
         .back-btn { background: #757575; color: white; border: none; padding: 5px 12px; border-radius: 5px; float: left; cursor: pointer; margin-bottom: 10px; }
+        
+        .recap-container { margin-top: 20px; max-height: 200px; overflow-y: auto; text-align: left; font-size: 0.8em; background: #f9f9f9; border-radius: 10px; padding: 10px; }
+        table { width: 100%; border-collapse: collapse; color: #333; }
+        th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: center; }
         @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        .recap-container { margin-top: 20px; max-height: 200px; overflow-y: auto; text-align: left; font-size: 0.8em; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 6px; text-align: center; }
     </style>
 </head>
 <body>
@@ -43,36 +43,37 @@
 
     <div id="dashboard" class="card">
         <h2>Menu Game THR</h2>
-        <div class="menu-item" onclick="openSetup('angka')">🔢 Tebak Angka (Manual)</div>
-        <div class="menu-item" onclick="openSetup('spin')">🎡 Spin Wheel (Eliminasi)</div>
+        <div class="menu-item" onclick="openSetup('angka')">🔢 Tebak Angka Keberuntungan</div>
+        <div class="menu-item" onclick="openSetup('bar')">🎰 Slot Bar (Acak Eliminasi)</div>
     </div>
 
     <div id="setup" class="card" style="display:none;">
         <button class="back-btn" onclick="showDashboard()">← Menu</button><br>
         <h2 id="setup-title">Setup Game</h2>
-        <input type="number" id="inp-peserta" placeholder="Jumlah Peserta" value="7">
+        <input type="number" id="inp-peserta" placeholder="Jumlah Peserta" value="5">
         <input type="number" id="inp-budget" placeholder="Total Budget (Rp)" value="500000">
-        <button class="btn-main" onclick="initGame()">MULAI SEKARANG 🚀</button>
+        <button class="btn-main" onclick="initGame()">MULAI GAME 🚀</button>
     </div>
 
     <div id="game-angka" class="card" style="display:none;">
-        <h3 id="info-angka">Pilih Angka Keberuntungan!</h3>
+        <h3>Pilih Satu Angka!</h3>
         <div class="grid-angka" id="angka-area"></div>
         <div class="recap-container">
-            <table id="recap-angka-table"><thead><tr><th>No</th><th>Hasil</th></tr></thead><tbody id="recap-angka-body"></tbody></table>
+            <table id="recap-angka-table"><thead><tr><th>No</th><th>Hasil THR</th></tr></thead><tbody id="recap-angka-body"></tbody></table>
         </div>
         <button class="btn-main" onclick="showDashboard()" style="background:#757575">Keluar</button>
     </div>
 
-    <div id="game-spin" class="card" style="display:none;">
-        <h3 id="info-spin">Giliran Peserta ke-1</h3>
-        <div class="wheel-box">
-            <div class="pointer"></div>
-            <canvas id="canvas"></canvas>
+    <div id="game-bar" class="card" style="display:none;">
+        <h3 id="info-bar">Giliran Peserta ke-1</h3>
+        <div class="slot-label">Tekan STOP untuk mengunci hadiah!</div>
+        <div class="slot-container">
+            <div id="slot-val">Rp0</div>
         </div>
-        <button class="btn-main" id="btn-spin" onclick="spinNow()">PUTAR RODA 🎡</button>
+        <button class="btn-main" id="btn-slot" onclick="handleSlot()">ACAK HADIAH 🎰</button>
+        
         <div class="recap-container">
-            <table id="recap-spin-table"><thead><tr><th>Peserta</th><th>Hasil</th></tr></thead><tbody id="recap-spin-body"></tbody></table>
+            <table id="recap-bar-table"><thead><tr><th>Peserta</th><th>Hasil THR</th></tr></thead><tbody id="recap-bar-body"></tbody></table>
         </div>
         <button class="btn-main" onclick="showDashboard()" style="background:#757575; margin-top:10px;">Keluar</button>
     </div>
@@ -85,11 +86,12 @@
     let mode = '';
     let budgetList = [];
     let currentParticipant = 1;
-    let totalParticipants = 0;
-    let currentRotation = 0;
+    let isRunning = false;
+    let slotInterval;
 
     function format(v) { return "Rp" + new Intl.NumberFormat('id-ID').format(v); }
     function showDashboard() { location.reload(); }
+    
     function openSetup(m) {
         mode = m;
         document.getElementById('dashboard').style.display = 'none';
@@ -97,30 +99,30 @@
     }
 
     function initGame() {
-        totalParticipants = parseInt(document.getElementById('inp-peserta').value);
+        let jml = parseInt(document.getElementById('inp-peserta').value);
         let budget = parseInt(document.getElementById('inp-budget').value);
-        if(!totalParticipants || !budget) return alert("Isi data!");
+        if(!jml || !budget) return alert("Isi data dulu!");
 
-        // Algoritma pembagian uang (Jomplang & Adil)
-        let jackpot = Math.round((budget * (0.25 + Math.random() * 0.15)) / 1000) * 1000;
+        // Kalkulasi Distribusi
+        let jackpot = Math.round((budget * 0.3) / 1000) * 1000;
         let sisa = budget - jackpot;
-        let base = Math.floor(sisa / (totalParticipants - 1));
+        let base = Math.floor(sisa / (jml - 1));
         
         budgetList = [jackpot];
-        for(let i=0; i < totalParticipants - 1; i++){
-            let val = Math.round((base * (0.6 + Math.random() * 0.8)) / 1000) * 1000;
+        for(let i=0; i < jml - 1; i++){
+            let val = Math.round((base * (0.7 + Math.random() * 0.6)) / 1000) * 1000;
             if(val > sisa) val = base;
             budgetList.push(val);
             sisa -= val;
         }
         budgetList[1] += sisa;
-        budgetList.sort(() => Math.random() - 0.5); // Acak posisi awal
+        budgetList.sort(() => Math.random() - 0.5);
 
         document.getElementById('setup').style.display = 'none';
-        if(mode === 'angka') setupAngka(); else setupSpin();
+        if(mode === 'angka') setupAngka(); else setupBar();
     }
 
-    // --- LOGIC GAME ANGKA ---
+    // --- GAME ANGKA ---
     function setupAngka() {
         document.getElementById('game-angka').style.display = 'block';
         const area = document.getElementById('angka-area');
@@ -137,78 +139,65 @@
         el.innerText = format(val);
         document.getElementById('snd-click').play();
         if(val === Math.max(...budgetList)) { confetti(); document.getElementById('snd-win').play(); }
-        const row = `<tr><td>${i+1}</td><td>${format(val)}</td></tr>`;
-        document.getElementById('recap-angka-body').innerHTML += row;
+        document.getElementById('recap-angka-body').innerHTML += `<tr><td>${i+1}</td><td>${format(val)}</td></tr>`;
     }
 
-    // --- LOGIC GAME SPIN (ELIMINASI) ---
-    function setupSpin() {
-        document.getElementById('game-spin').style.display = 'block';
-        drawWheel();
+    // --- GAME SLOT BAR (ELIMINASI) ---
+    function setupBar() {
+        document.getElementById('game-bar').style.display = 'block';
+        document.getElementById('slot-val').innerText = "READY?";
     }
 
-    function drawWheel() {
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const size = canvas.width = 300;
-        const center = size / 2;
-        const slice = (Math.PI * 2) / budgetList.length;
+    function handleSlot() {
+        const btn = document.getElementById('btn-slot');
+        const display = document.getElementById('slot-val');
 
-        ctx.clearRect(0,0,size,size);
-        budgetList.forEach((val, i) => {
-            const angle = i * slice;
-            ctx.fillStyle = i % 2 === 0 ? "#1b5e20" : "#ffd700";
-            ctx.beginPath(); ctx.moveTo(center, center);
-            ctx.arc(center, center, center, angle, angle + slice);
-            ctx.fill();
+        if (!isRunning) {
+            // MULAI ACAK
+            isRunning = true;
+            btn.innerText = "STOP! ✋";
+            btn.style.background = "#d32f2f";
+            
+            slotInterval = setInterval(() => {
+                let randomTemp = budgetList[Math.floor(Math.random() * budgetList.length)];
+                display.innerText = format(randomTemp);
+            }, 50);
+            
+        } else {
+            // BERHENTI (ELIMINASI)
+            isRunning = false;
+            clearInterval(slotInterval);
+            btn.disabled = true;
 
-            // Teks nominal di roda
-            ctx.save();
-            ctx.translate(center, center);
-            ctx.rotate(angle + slice/2);
-            ctx.fillStyle = i % 2 === 0 ? "white" : "black";
-            ctx.font = "bold 12px Poppins";
-            ctx.fillText(format(val), 60, 5);
-            ctx.restore();
-        });
-    }
+            // Pilih hasil final dari sisa list
+            let winIdx = Math.floor(Math.random() * budgetList.length);
+            let winVal = budgetList[winIdx];
+            display.innerText = format(winVal);
 
-    function spinNow() {
-        if(budgetList.length === 0) return alert("Semua sudah dapat THR!");
-        const btn = document.getElementById('btn-spin');
-        btn.disabled = true;
-
-        const canvas = document.getElementById('canvas');
-        const extraDeg = Math.floor(Math.random() * 360) + 3600;
-        currentRotation += extraDeg;
-        canvas.style.transform = `rotate(${currentRotation}deg)`;
-
-        setTimeout(() => {
-            // Hitung hasil berdasarkan rotasi (Jarum ada di atas / -90 derajat)
-            const actualDeg = currentRotation % 360;
-            const sliceDeg = 360 / budgetList.length;
-            const winIdx = Math.floor(((360 - actualDeg + 270) % 360) / sliceDeg);
-            const winVal = budgetList[winIdx];
-
-            // Recap & Alert
+            // Efek Menang
             document.getElementById('snd-win').play();
-            confetti({particleCount: 100});
-            const row = `<tr><td>Peserta ${currentParticipant}</td><td>${format(winVal)}</td></tr>`;
-            document.getElementById('recap-spin-body').innerHTML += row;
+            confetti({particleCount: 100, spread: 70});
 
-            // ELIMINASI: Hapus nominal yang sudah didapat
+            // Update Rekap
+            document.getElementById('recap-bar-body').innerHTML += `<tr><td>Peserta ${currentParticipant}</td><td>${format(winVal)}</td></tr>`;
+
+            // Hapus dari daftar agar tidak muncul lagi
             budgetList.splice(winIdx, 1);
             currentParticipant++;
 
-            if(budgetList.length > 0) {
-                document.getElementById('info-spin').innerText = `Giliran Peserta ke-${currentParticipant}`;
-                drawWheel(); // Gambar ulang roda tanpa nominal tadi
-            } else {
-                document.getElementById('info-spin').innerText = `Permainan Selesai!`;
-                btn.style.display = 'none';
-            }
-            btn.disabled = false;
-        }, 4000);
+            setTimeout(() => {
+                if (budgetList.length > 0) {
+                    btn.disabled = false;
+                    btn.innerText = "LANJUT KE PESERTA BERIKUTNYA 🎰";
+                    btn.style.background = "var(--primary)";
+                    document.getElementById('info-bar').innerText = `Giliran Peserta ke-${currentParticipant}`;
+                } else {
+                    btn.style.display = 'none';
+                    document.getElementById('info-bar').innerText = "SEMUA SUDAH DAPAT THR!";
+                    display.innerText = "FINISH 🏁";
+                }
+            }, 1500);
+        }
     }
 </script>
 </body>
