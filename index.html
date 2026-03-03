@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>THR Yudi v29.0 - Final Fix</title>
+    <title>THR Yudi v31.0 - Full Flow Fix</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
@@ -14,49 +14,44 @@
         :root { --primary: #0a3d0d; --gold: #d4af37; --dark: #051a06; --glass: rgba(255, 255, 255, 0.98); }
         body { font-family: 'Poppins', sans-serif; background: var(--dark); color: #fff; margin: 0; padding: 0; overflow-x: hidden; }
         .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #113311 0%, #051a06 100%); z-index: -1; }
-        .container { max-width: 450px; margin: auto; padding: 15px; min-height: 100vh; display: flex; flex-direction: column; }
+        .container { max-width: 450px; margin: auto; padding: 15px; min-height: 100vh; }
         
-        .card { background: var(--glass); border-radius: 20px; padding: 20px; color: #111; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid var(--gold); margin-bottom: 15px; }
-        h1 { color: var(--gold); font-weight: 800; text-align: center; margin: 0 0 10px 0; font-size: 1.6em; }
+        .card { background: var(--glass); border-radius: 20px; padding: 20px; color: #111; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid var(--gold); margin-bottom: 15px; text-align: center; }
+        h1 { color: var(--gold); font-weight: 800; margin: 0 0 10px 0; font-size: 1.6em; }
 
-        .btn { border: none; padding: 14px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.2s; width: 100%; font-family: inherit; margin-top: 8px; text-transform: uppercase; }
+        .btn { border: none; padding: 14px; border-radius: 12px; font-weight: 800; cursor: pointer; width: 100%; font-family: inherit; margin-top: 8px; text-transform: uppercase; }
         .btn-primary { background: var(--primary); color: var(--gold); }
         .btn-gold { background: var(--gold); color: white; }
         .btn-danger { background: #d32f2f; color: white; }
 
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 10px; text-align: center; font-size: 1em; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 10px; text-align: center; }
 
-        /* QR Center */
-        .qr-area { display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 15px 0; }
+        .qr-area { display: flex; flex-direction: column; align-items: center; margin: 15px 0; }
         #qr-code { background: white; padding: 10px; border-radius: 10px; border: 4px solid var(--gold); }
 
-        /* Game Box */
-        #game-box { position: relative; width: 100%; height: 400px; background: rgba(0,0,0,0.2); border-radius: 15px; overflow: hidden; border: 1px dashed var(--gold); }
+        /* Game Area */
+        #game-box { position: relative; width: 100%; height: 350px; background: rgba(0,0,0,0.4); border-radius: 15px; overflow: hidden; border: 1px solid var(--gold); margin-bottom: 15px; }
         
-        /* Falling Angpao */
-        .angpao {
-            position: absolute; width: 50px; height: 70px; background: #e63946; 
-            border: 2px solid var(--gold); border-radius: 8px; display: flex;
-            align-items: center; justify-content: center; font-size: 1.5em;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 10;
-            animation: fall linear infinite;
-        }
+        /* Angpao */
+        .angpao { position: absolute; width: 50px; height: 70px; background: #e63946; border: 2px solid var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; animation: fall linear infinite; z-index: 5; cursor: pointer; }
         .angpao::after { content: '🧧'; }
-        @keyframes fall {
-            0% { transform: translateY(-100px) rotate(0deg); }
-            100% { transform: translateY(500px) rotate(360deg); }
-        }
+        @keyframes fall { 0% { transform: translateY(-100px) rotate(0deg); } 100% { transform: translateY(450px) rotate(360deg); } }
 
-        /* Grid Game */
+        /* Grid */
         .grid-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; }
-        .cell { background: #fff; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; border: 1px solid #ddd; box-shadow: 0 4px 0 #ccc; }
-        .cell.my-pick { background: var(--gold) !important; color: white; border-color: #b8860b; }
-        .cell.taken { background: #eee; color: #aaa; opacity: 0.5; }
+        .cell { background: #fff; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #ddd; color: #333; }
+        .cell.my-pick { background: var(--gold) !important; color: white; }
+        .cell.taken { background: #eee; color: #aaa; }
 
-        /* Host Recap Table */
-        .recap-table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; border-radius: 10px; overflow: hidden; font-size: 0.85em; }
-        .recap-table th { background: #eee; padding: 10px; text-align: left; }
-        .recap-table td { padding: 10px; border-bottom: 1px solid #f0f0f0; color: #333; }
+        /* Host Recap */
+        #host-only-panel { display: none; margin-top: 20px; }
+        .recap-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; font-size: 0.85em; color: #333; text-align: left; }
+        .recap-table th { background: #eee; padding: 10px; }
+        .recap-table td { padding: 10px; border-bottom: 1px solid #f0f0f0; }
+
+        /* Loader */
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--gold); border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -71,30 +66,30 @@
     </div>
 
     <div id="screen-host-setup" class="card" style="display:none;">
-        <h3>Konfigurasi</h3>
+        <h3>Set Budget</h3>
         <input type="password" id="h-pass" placeholder="Admin Password">
-        <input type="number" id="h-budget" value="1000000" placeholder="Total Budget">
+        <input type="number" id="h-budget" value="1000000">
         <button class="btn btn-primary" onclick="initHost()">BUAT ROOM</button>
-        <button class="btn" onclick="goTo('screen-start')">KEMBALI</button>
+        <button class="btn" onclick="goTo('screen-start')">BATAL</button>
     </div>
 
     <div id="screen-host-lobby" class="card" style="display:none;">
         <div class="qr-area">
             <div id="qr-code"></div>
-            <h2 style="margin:10px 0 0 0;">KODE: <span id="room-id">----</span></h2>
+            <h2 style="margin:10px 0;">KODE: <span id="room-id">----</span></h2>
         </div>
         <select id="g-type">
             <option value="angka">🔢 Tebak Angka</option>
             <option value="pancing">🧧 Rebutan Angpao Terbang</option>
             <option value="slot">🎰 Slot Keberuntungan</option>
         </select>
-        <div id="player-count" style="text-align:center; margin:10px 0; font-size:0.9em;">0 Peserta Terhubung</div>
-        <button class="btn btn-primary" onclick="startGame()">MULAI GAME 🏁</button>
+        <div id="player-count" style="font-weight: bold; margin:10px 0;">0 Peserta Tergabung</div>
+        <button class="btn btn-primary" onclick="startGame()">MULAI SEKARANG 🏁</button>
     </div>
 
     <div id="screen-part-join" class="card" style="display:none;">
         <h3>Masuk Room</h3>
-        <input type="text" id="p-name" placeholder="Nama Lengkap">
+        <input type="text" id="p-name" placeholder="Nama Kamu">
         <input type="text" id="p-id" placeholder="Kode 4 Digit">
         <button class="btn btn-primary" onclick="initPart()">GABUNG</button>
         <div id="reader" style="width:100%; margin-top:10px;"></div>
@@ -102,19 +97,26 @@
         <button class="btn" onclick="goTo('screen-start')">KEMBALI</button>
     </div>
 
+    <div id="screen-part-lobby" class="card" style="display:none;">
+        <h2 style="color:var(--primary)">SABAR YA!</h2>
+        <div class="loader"></div>
+        <p>Sudah terhubung sebagai: <b id="wait-name" style="color:var(--gold)">-</b></p>
+        <p>Lagi nunggu Yudi buat mulai gamenya...</p>
+    </div>
+
     <div id="screen-game" style="display:none;">
         <div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center;">
-            <b id="game-label">GAME</b>
-            <span id="user-label" style="background:#ddd; padding:2px 8px; border-radius:5px; font-size:0.8em; color:#000;"></span>
+            <b id="game-label" style="color:var(--primary)">GAME</b>
+            <span id="user-label" style="background:#ddd; padding:2px 8px; border-radius:5px; color:#000; font-size:0.8em;"></span>
         </div>
 
         <div id="game-box"></div>
 
-        <div id="host-only-panel" style="display:none; margin-top:15px;">
-            <div class="card" style="background:white;">
-                <button class="btn btn-gold" onclick="revealAll()">🎁 BUKA HASIL SEMUA</button>
-                <button class="btn btn-danger" onclick="resetGame()">GANTI GAME / LOBBY</button>
-                <h4 style="margin:15px 0 5px 0; color:#000;">Rekap Pemenang:</h4>
+        <div id="host-only-panel">
+            <button class="btn btn-gold" onclick="revealAll()">🎁 BUKA HASIL SEMUA</button>
+            <button class="btn btn-danger" onclick="resetGame()">GANTI GAME / BALIK LOBBY</button>
+            <div class="card" style="margin-top:15px; padding:10px; text-align:left;">
+                <h4 style="margin:0 0 10px 0;">Tabel Pemenang (Real-time):</h4>
                 <table class="recap-table">
                     <thead><tr><th>Nama</th><th>Hasil</th></tr></thead>
                     <tbody id="recap-body"></tbody>
@@ -141,19 +143,15 @@
     let room = null, myName = "", myRoomId = "", isHost = false, hasPicked = false, spoken = false;
 
     function goTo(id) {
-        document.querySelectorAll('.card, #screen-game').forEach(s => s.style.display = 'none');
+        document.querySelectorAll('.card, #screen-game, #screen-part-lobby').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
     }
 
     function initHost() {
-        if(document.getElementById('h-pass').value !== "yudi123") return alert("Password Salah!");
+        if(document.getElementById('h-pass').value !== "yudi123") return alert("Salah Password!");
         isHost = true;
         myRoomId = Math.floor(1000 + Math.random() * 9000).toString();
-        db.ref('active_sessions/' + myRoomId).set({
-            status: 'lobby',
-            budget: parseInt(document.getElementById('h-budget').value) || 1000000,
-            showResults: false
-        });
+        db.ref('active_sessions/' + myRoomId).set({ status: 'lobby', budget: parseInt(document.getElementById('h-budget').value), showResults: false });
         document.getElementById('room-id').innerText = myRoomId;
         document.getElementById('qr-code').innerHTML = "";
         new QRCode(document.getElementById('qr-code'), { text: myRoomId, width: 150, height: 150 });
@@ -164,10 +162,11 @@
     function initPart() {
         myName = document.getElementById('p-name').value.trim();
         myRoomId = document.getElementById('p-id').value.trim();
-        if(!myName || !myRoomId) return alert("Isi nama & kode!");
+        if(!myName || !myRoomId) return alert("Isi Nama & Kode!");
         db.ref(`active_sessions/${myRoomId}/players/${myName}`).set(true);
         document.getElementById('user-label').innerText = myName;
-        goTo('screen-game'); // Wait screen
+        document.getElementById('wait-name').innerText = myName;
+        goTo('screen-part-lobby'); // Masuk layar tunggu
         sync();
     }
 
@@ -175,14 +174,15 @@
         db.ref('active_sessions/' + myRoomId).on('value', snap => {
             room = snap.val();
             if(!room) return;
-            const players = Object.keys(room.players || {});
-            if(isHost) document.getElementById('player-count').innerText = players.length + " Peserta Terhubung";
-
+            if(isHost) document.getElementById('player-count').innerText = Object.keys(room.players || {}).length + " Peserta Tergabung";
+            
             if(room.status === 'playing') {
                 goTo('screen-game');
+                document.getElementById('host-only-panel').style.display = isHost ? 'block' : 'none';
                 render();
-            } else if(room.status === 'lobby' && isHost) {
-                goTo('screen-host-lobby');
+            } else if(room.status === 'lobby') {
+                if(isHost) goTo('screen-host-lobby');
+                else if(myName) goTo('screen-part-lobby');
             }
         });
     }
@@ -191,18 +191,13 @@
         const type = document.getElementById('g-type').value;
         db.ref('active_sessions/' + myRoomId).once('value', snap => {
             const ps = Object.keys(snap.val().players || {});
-            if(ps.length === 0) return alert("Belum ada pemain!");
-            
-            let budget = snap.val().budget;
-            let list = [];
-            let currentTotal = 0;
+            if(ps.length === 0) return alert("Belum ada peserta!");
+            let budget = snap.val().budget, list = [], current = 0;
             for(let i=0; i<ps.length; i++) {
-                if(i === ps.length - 1) {
-                    list.push(budget - currentTotal);
-                } else {
-                    let share = Math.round((budget / ps.length) * (0.7 + Math.random() * 0.6) / 1000) * 1000;
-                    list.push(share);
-                    currentTotal += share;
+                if(i === ps.length - 1) list.push(budget - current);
+                else {
+                    let s = Math.round((budget / ps.length) * (0.7 + Math.random() * 0.6) / 1000) * 1000;
+                    list.push(s); current += s;
                 }
             }
             list.sort(() => Math.random() - 0.5);
@@ -214,13 +209,10 @@
         const box = document.getElementById('game-box');
         box.innerHTML = "";
         document.getElementById('game-label').innerText = room.gameType.toUpperCase();
-
         if(isHost) {
-            document.getElementById('host-only-panel').style.display = 'block';
-            box.innerHTML = "<p style='color:white; text-align:center; padding-top:150px;'>Monitoring Mode...<br>Cek tabel di bawah</p>";
+            box.innerHTML = "<p style='text-align:center; padding-top:140px; color:#aaa;'>MONITORING ACTIVE<br>Lihat Tabel di Bawah</p>";
             updateRecap();
         } else {
-            document.getElementById('host-only-panel').style.display = 'none';
             if(room.gameType === 'pancing') renderPancing();
             else if(room.gameType === 'angka') renderAngka();
             else renderSlot();
@@ -229,23 +221,20 @@
 
     function renderPancing() {
         const box = document.getElementById('game-box');
-        let myData = null;
-        if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === myName) myData = s; });
-
-        if(myData) {
+        let myD = null;
+        if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === myName) myD = s; });
+        if(myD) {
             box.innerHTML = `<div style="text-align:center; padding-top:100px;"><h2>🧧 TERTANGKAP!</h2>
-            ${room.showResults ? `<h1>Rp${myData.val.toLocaleString()}</h1>` : '<p>Tunggu Yudi buka hasilnya...</p>'}</div>`;
-            if(room.showResults) handleVoice(myData.val);
+            ${room.showResults ? `<h1>Rp${myD.val.toLocaleString()}</h1>` : '<p>Tunggu dibuka Yudi...</p>'}</div>`;
+            if(room.showResults) handleVoice(myD.val);
             return;
         }
-
         room.budgetList.forEach((val, i) => {
             if(!room.selections || !room.selections[i]) {
                 const el = document.createElement('div');
                 el.className = "angpao";
                 el.style.left = Math.random() * 80 + "%";
                 el.style.animationDuration = (2 + Math.random() * 2) + "s";
-                el.style.animationDelay = Math.random() * 2 + "s";
                 el.onclick = () => pick(i, val);
                 box.appendChild(el);
             }
@@ -260,11 +249,8 @@
             const sel = room.selections ? room.selections[i] : null;
             const el = document.createElement('div');
             el.className = `cell ${sel ? (sel.name === myName ? 'my-pick' : 'taken') : ''}`;
-            if(room.showResults && sel && sel.name === myName) {
-                el.innerText = `Rp${val.toLocaleString()}`; handleVoice(val);
-            } else {
-                el.innerText = sel ? (sel.name === myName ? "SAYA" : "X") : i+1;
-            }
+            if(room.showResults && sel && sel.name === myName) { el.innerText = `Rp${val.toLocaleString()}`; handleVoice(val); }
+            else { el.innerText = sel ? (sel.name === myName ? "SAYA" : "X") : i+1; }
             el.onclick = () => { if(!hasPicked && !sel) pick(i, val); };
             grid.appendChild(el);
         });
@@ -272,28 +258,24 @@
 
     function renderSlot() {
         const box = document.getElementById('game-box');
-        let myWin = null;
-        if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === myName) myWin = s.val; });
-        if(myWin) {
-            box.innerHTML = `<div style="text-align:center; padding-top:100px;"><h1>🎰 Rp${myWin.toLocaleString()}</h1></div>`;
-            handleVoice(myWin);
+        let myW = null;
+        if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === myName) myW = s.val; });
+        if(myW) {
+            box.innerHTML = `<div style="text-align:center; padding-top:100px;"><h1>🎰 Rp${myW.toLocaleString()}</h1></div>`;
+            handleVoice(myW);
         } else {
-            box.innerHTML = `<div style="padding:20px;"><button class="btn btn-gold" onclick="spin()">PUTAR SLOT 🎰</button></div>`;
+            box.innerHTML = `<div style="padding:20px;"><button class="btn btn-gold" onclick="spin()">SPIN SLOT 🎰</button></div>`;
         }
     }
 
     function pick(i, v) {
-        db.ref(`active_sessions/${myRoomId}/selections/${i}`).transaction(c => {
-            if(c === null) return { name: myName, val: v };
-            return;
-        }, (err, ok) => { if(ok) { hasPicked = true; confetti(); } });
+        db.ref(`active_sessions/${myRoomId}/selections/${i}`).transaction(c => c === null ? { name: myName, val: v } : undefined, (err, ok) => { if(ok) { hasPicked = true; confetti(); } });
     }
 
     function spin() {
         db.ref(`active_sessions/${myRoomId}`).once('value', snap => {
             const d = snap.val();
-            let tk = d.selections ? Object.keys(d.selections).map(Number) : [];
-            let av = d.budgetList.map((_, i) => i).filter(idx => !tk.includes(idx));
+            let av = d.budgetList.map((_, i) => i).filter(idx => !d.selections || !d.selections[idx]);
             if(av.length > 0) pick(av[0], d.budgetList[av[0]]);
         });
     }
@@ -303,11 +285,7 @@
         body.innerHTML = "";
         Object.keys(room.players || {}).forEach(p => {
             let res = "---";
-            if(room.selections) {
-                Object.values(room.selections).forEach(s => {
-                    if(s.name === p) res = room.showResults ? `<b>Rp${s.val.toLocaleString()}</b>` : '✅ OK';
-                });
-            }
+            if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === p) res = room.showResults ? `<b>Rp${s.val.toLocaleString()}</b>` : '✅ OK'; });
             body.innerHTML += `<tr><td>${p}</td><td>${res}</td></tr>`;
         });
     }
