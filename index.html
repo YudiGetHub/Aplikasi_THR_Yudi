@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game THR Keluarga Yudi - Auto Jackpot</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #0d47a1, #1976d2); color: white; text-align: center; padding: 10px; min-height: 100vh; margin: 0; }
+        .card { background: white; color: #333; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 450px; margin: 10px auto; }
+        h1 { color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); font-size: 1.5em; margin: 10px 0; }
+        .input-group { text-align: left; margin-bottom: 12px; }
+        label { font-size: 0.85em; font-weight: bold; color: #555; }
+        input { width: 100%; padding: 12px; margin-top: 5px; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1em; }
+        button { background: linear-gradient(to right, #1565c0, #1976d2); color: white; border: none; padding: 15px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1em; transition: 0.3s; margin-top: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .num-btn { background: #f5f5f5; color: #333; padding: 20px 5px; border-radius: 15px; font-size: 1.3em; font-weight: bold; cursor: pointer; border: 3px solid #e0e0e0; display: flex; align-items: center; justify-content: center; min-height: 50px; box-shadow: inset 0 -4px 0 #ddd; transition: 0.5s; }
+        .revealed { background: #fff !important; color: #1565c0 !important; font-size: 0.85em !important; transform: rotateY(360deg); border-color: #1976d2; box-shadow: none; }
+        .jackpot { background: #ffd700 !important; color: #d32f2f !important; animation: pulse 1s infinite alternate; border-color: #ff9800; font-weight: bold; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+        #display-budget { font-size: 1.1em; background: #e3f2fd; padding: 10px; border-radius: 10px; color: #0d47a1; font-weight: bold; margin-bottom: 15px; border: 1px solid #bbdefb; }
+        .recap-container { margin-top: 20px; text-align: left; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; color: #0d47a1; }
+        .row-jackpot { background-color: #fff9c4; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>💰 THR DIGITAL YUDI 💰</h1>
+
+    <div class="card" id="setup-screen">
+        <h2>Atur Game</h2>
+        <div class="input-group">
+            <label>Jumlah Peserta:</label>
+            <input type="number" id="total-peserta" value="7" min="2">
+        </div>
+        <div class="input-group">
+            <label>Total Budget Bagi-Bagi (Rp):</label>
+            <input type="number" id="total-budget" value="1000000" step="1000">
+        </div>
+        <button onclick="siapkanGame()">Kocok Angka & Mulai!</button>
+        <p style="font-size: 0.8em; color: #888; margin-top: 10px;">*Sistem akan menentukan Jackpot & THR lainnya secara otomatis agar adil.</p>
+    </div>
+
+    <div class="card" id="game-screen" style="display:none;">
+        <div id="display-budget">Sisa Budget: Rp 0</div>
+        <div class="grid" id="number-grid"></div>
+
+        <div class="recap-container">
+            <h3>📊 Rekap Hasil:</h3>
+            <table id="recap-table">
+                <thead>
+                    <tr>
+                        <th>Angka</th>
+                        <th>Nominal</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="recap-body"></tbody>
+            </table>
+        </div>
+        <button onclick="resetGame()" style="background: #757575; margin-top: 20px;">Main Ulang</button>
+    </div>
+
+    <audio id="snd-click" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="snd-jackpot" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+
+<script>
+    let dataTHR = {};
+    let angkaAjaib = 0;
+    let sisaBudgetGlobal = 0;
+
+    function formatRupiah(angka) {
+        return "Rp" + new Intl.NumberFormat('id-ID').format(angka);
+    }
+
+    function siapkanGame() {
+        const jmlPeserta = parseInt(document.getElementById('total-peserta').value);
+        const totalBudget = parseInt(document.getElementById('total-budget').value);
+
+        if (!jmlPeserta || !totalBudget) return alert("Masukkan data dulu!");
+
+        // 1. Pilih Angka Ajaib
+        angkaAjaib = Math.floor(Math.random() * jmlPeserta) + 1;
+
+        // 2. Tentukan Jackpot Otomatis (Antara 20% - 35% dari total budget)
+        let nominalJackpot = Math.round((totalBudget * (0.2 + Math.random() * 0.15)) / 1000) * 1000;
+
+        // 3. Distribusi sisanya ke peserta lain
+        let sisaUang = totalBudget - nominalJackpot;
+        let perOrangBiasaBase = Math.floor(sisaUang / (jmlPeserta - 1));
+
+        sisaBudgetGlobal = totalBudget;
+        const grid = document.getElementById('number-grid');
+        grid.innerHTML = "";
+        document.getElementById('recap-body').innerHTML = "";
+
+        let temporaryData = [];
+
+        for (let i = 1; i <= jmlPeserta; i++) {
+            let nominal = 0;
+            if (i === angkaAjaib) {
+                nominal = nominalJackpot;
+            } else {
+                // Variasi +- 15% agar tidak terlalu jomplang satu sama lain
+                let variasi = Math.floor((Math.random() * 0.3 - 0.15) * perOrangBiasaBase);
+                nominal = Math.round((perOrangBiasaBase + variasi) / 1000) * 1000;
+
+                // Pastikan uang sisa tidak minus
+                if (nominal > sisaUang) nominal = perOrangBiasaBase;
+                sisaUang -= nominal;
+            }
+            temporaryData[i] = nominal;
+        }
+
+        // 4. Koreksi agar total PAS dengan budget (ditambahkan ke salah satu orang biasa)
+        if (sisaUang !== 0) {
+            for (let i = 1; i <= jmlPeserta; i++) {
+                if (i !== angkaAjaib) {
+                    temporaryData[i] += sisaUang;
+                    break;
+                }
+            }
+        }
+
+        dataTHR = temporaryData;
+
+        // Render Tombol
+        for (let i = 1; i <= jmlPeserta; i++) {
+            const btn = document.createElement('div');
+            btn.className = 'num-btn';
+            btn.id = 'btn-' + i;
+            btn.innerText = i;
+            btn.onclick = () => bukaAngka(i);
+            grid.appendChild(btn);
+        }
+
+        document.getElementById('display-budget').innerText = "Total Budget: " + formatRupiah(totalBudget);
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'block';
+    }
+
+    function bukaAngka(nomor) {
+        const btn = document.getElementById('btn-' + nomor);
+        if (btn.classList.contains('revealed')) return;
+
+        const nominal = dataTHR[nomor];
+        btn.classList.add('revealed');
+        btn.innerText = formatRupiah(nominal);
+
+        const row = document.createElement('tr');
+        if (nomor === angkaAjaib) row.className = 'row-jackpot';
+        row.innerHTML = `<td>${nomor}</td><td>${formatRupiah(nominal)}</td><td>${nomor === angkaAjaib ? 'JACKPOT 🎉' : 'Biasa'}</td>`;
+        document.getElementById('recap-body').appendChild(row);
+
+        if (nomor === angkaAjaib) {
+            document.getElementById('snd-jackpot').play();
+            btn.classList.add('jackpot');
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        } else {
+            document.getElementById('snd-click').play();
+        }
+
+        sisaBudgetGlobal -= nominal;
+        document.getElementById('display-budget').innerText = "Sisa: " + formatRupiah(Math.max(0, sisaBudgetGlobal));
+    }
+
+    function resetGame() {
+        if(confirm("Ulang setting?")) location.reload();
+    }
+</script>
+</body>
+</html>
