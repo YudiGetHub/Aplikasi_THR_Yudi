@@ -41,22 +41,16 @@
             <input type="number" id="total-budget" value="1000000" step="1000">
         </div>
         <button onclick="siapkanGame()">Kocok Angka & Mulai!</button>
-        <p style="font-size: 0.8em; color: #888; margin-top: 10px;">*Sistem akan menentukan Jackpot & THR lainnya secara otomatis agar adil.</p>
     </div>
 
     <div class="card" id="game-screen" style="display:none;">
         <div id="display-budget">Sisa Budget: Rp 0</div>
         <div class="grid" id="number-grid"></div>
-
         <div class="recap-container">
             <h3>📊 Rekap Hasil:</h3>
             <table id="recap-table">
                 <thead>
-                    <tr>
-                        <th>Angka</th>
-                        <th>Nominal</th>
-                        <th>Status</th>
-                    </tr>
+                    <tr><th>Angka</th><th>Nominal</th><th>Status</th></tr>
                 </thead>
                 <tbody id="recap-body"></tbody>
             </table>
@@ -64,8 +58,8 @@
         <button onclick="resetGame()" style="background: #757575; margin-top: 20px;">Main Ulang</button>
     </div>
 
-    <audio id="snd-click" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
-    <audio id="snd-jackpot" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+    <audio id="snd-click" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" preload="auto"></audio>
+    <audio id="snd-jackpot" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3" preload="auto"></audio>
 
 <script>
     let dataTHR = {};
@@ -79,65 +73,47 @@
     function siapkanGame() {
         const jmlPeserta = parseInt(document.getElementById('total-peserta').value);
         const totalBudget = parseInt(document.getElementById('total-budget').value);
+        if (!jmlPeserta || !totalBudget) return alert("Isi data!");
 
-        if (!jmlPeserta || !totalBudget) return alert("Masukkan data dulu!");
-
-        // 1. Pilih Angka Ajaib
         angkaAjaib = Math.floor(Math.random() * jmlPeserta) + 1;
-
-        // 2. Tentukan Jackpot Otomatis (Antara 20% - 35% dari total budget)
         let nominalJackpot = Math.round((totalBudget * (0.2 + Math.random() * 0.15)) / 1000) * 1000;
-
-        // 3. Distribusi sisanya ke peserta lain
         let sisaUang = totalBudget - nominalJackpot;
         let perOrangBiasaBase = Math.floor(sisaUang / (jmlPeserta - 1));
-
+        
         sisaBudgetGlobal = totalBudget;
-        const grid = document.getElementById('number-grid');
-        grid.innerHTML = "";
+        document.getElementById('number-grid').innerHTML = "";
         document.getElementById('recap-body').innerHTML = "";
 
         let temporaryData = [];
-
         for (let i = 1; i <= jmlPeserta; i++) {
-            let nominal = 0;
             if (i === angkaAjaib) {
-                nominal = nominalJackpot;
+                temporaryData[i] = nominalJackpot;
             } else {
-                // Variasi +- 15% agar tidak terlalu jomplang satu sama lain
                 let variasi = Math.floor((Math.random() * 0.3 - 0.15) * perOrangBiasaBase);
-                nominal = Math.round((perOrangBiasaBase + variasi) / 1000) * 1000;
-
-                // Pastikan uang sisa tidak minus
+                let nominal = Math.round((perOrangBiasaBase + variasi) / 1000) * 1000;
                 if (nominal > sisaUang) nominal = perOrangBiasaBase;
+                temporaryData[i] = nominal;
                 sisaUang -= nominal;
             }
-            temporaryData[i] = nominal;
         }
 
-        // 4. Koreksi agar total PAS dengan budget (ditambahkan ke salah satu orang biasa)
         if (sisaUang !== 0) {
             for (let i = 1; i <= jmlPeserta; i++) {
-                if (i !== angkaAjaib) {
-                    temporaryData[i] += sisaUang;
-                    break;
-                }
+                if (i !== angkaAjaib) { temporaryData[i] += sisaUang; break; }
             }
         }
 
         dataTHR = temporaryData;
-
-        // Render Tombol
         for (let i = 1; i <= jmlPeserta; i++) {
             const btn = document.createElement('div');
             btn.className = 'num-btn';
             btn.id = 'btn-' + i;
             btn.innerText = i;
             btn.onclick = () => bukaAngka(i);
-            grid.appendChild(btn);
+            document.getElementById('number-grid').appendChild(btn);
         }
 
-        document.getElementById('display-budget').innerText = "Total Budget: " + formatRupiah(totalBudget);
+        document.getElementById('display-budget').innerText = "Total: " + formatRupiah(totalBudget);
         document.getElementById('setup-screen').style.display = 'none';
         document.getElementById('game-screen').style.display = 'block';
     }
@@ -156,20 +132,18 @@
         document.getElementById('recap-body').appendChild(row);
 
         if (nomor === angkaAjaib) {
-            document.getElementById('snd-jackpot').play();
+            document.getElementById('snd-jackpot').play().catch(()=>{});
             btn.classList.add('jackpot');
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         } else {
-            document.getElementById('snd-click').play();
+            document.getElementById('snd-click').play().catch(()=>{});
         }
 
         sisaBudgetGlobal -= nominal;
         document.getElementById('display-budget').innerText = "Sisa: " + formatRupiah(Math.max(0, sisaBudgetGlobal));
     }
 
-    function resetGame() {
-        if(confirm("Ulang setting?")) location.reload();
-    }
+    function resetGame() { if(confirm("Ulang?")) location.reload(); }
 </script>
 </body>
 </html>
