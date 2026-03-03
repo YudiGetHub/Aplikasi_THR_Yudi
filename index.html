@@ -3,91 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THR Online v23.0 - Private & Voice Edition</title>
+    <title>THR Premium v25.0 - Animated Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #1b5e20; --gold: #ffd700; --white: #ffffff; }
-        body { font-family: 'Poppins', sans-serif; background: #002200; color: var(--white); margin: 0; padding: 0; min-height: 100vh; }
-        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/stardust.png'); z-index: -1; }
-        .container { max-width: 480px; margin: auto; padding: 20px; text-align: center; }
-        .card { background: rgba(255, 255, 255, 0.95); border-radius: 25px; padding: 25px; color: #333; box-shadow: 0 15px 35px rgba(0,0,0,0.6); margin-top: 20px; border: 1px solid var(--gold); }
-        .btn-main { background: linear-gradient(135deg, var(--primary), #003300); color: var(--gold); border: 2px solid var(--gold); padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1.1em; }
-        .btn-gold { background: linear-gradient(135deg, var(--gold), #b8860b); color: #000; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-outline { background: transparent; color: #666; border: 1px solid #ccc; padding: 8px; width: 100%; border-radius: 8px; cursor: pointer; margin-top: 15px; font-size: 0.8em; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 10px; text-align: center; font-family: inherit; box-sizing: border-box; }
-        .lobby-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0; list-style: none; margin: 15px 0; }
-        .lobby-item { background: #f1f8e9; padding: 10px; border-radius: 10px; font-weight: 600; color: var(--primary); border: 1px solid #c8e6c9; font-size: 0.85em; }
-        .grid-game { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .game-item { background: #eee; height: 80px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.2em; font-weight: bold; cursor: pointer; border-bottom: 5px solid #ccc; transition: 0.2s; }
-        .game-item.selected-by-me { background: #ffd700 !important; border-color: #b8860b; transform: scale(0.95); }
-        .game-item.taken { background: #ccc !important; color: #999; cursor: not-allowed; border-bottom: none; }
-        .game-item.revealed { background: white !important; border: 2px solid var(--primary); color: var(--primary); font-size: 0.8em; border-bottom: none; animation: pop 0.3s ease-out; }
-        @keyframes pop { 0% { transform: scale(0.8); } 100% { transform: scale(1); } }
-        .slot-window { background: #000; color: var(--gold); height: 120px; display: flex; align-items: center; justify-content: center; font-size: 2.2em; border-radius: 15px; margin: 20px 0; border: 4px solid var(--gold); font-weight: 800; }
-        .rolling { animation: blur 0.1s infinite; }
-        @keyframes blur { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-        table { width: 100%; font-size: 0.85em; margin-top: 15px; border-collapse: collapse; }
-        th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
+        :root { --primary: #0a3d0d; --gold: #d4af37; --dark: #051a06; --glass: rgba(255, 255, 255, 0.95); }
+        body { font-family: 'Poppins', sans-serif; background: var(--dark); color: #fff; margin: 0; padding: 0; min-height: 100vh; overflow-x: hidden; }
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #113311 0%, #051a06 100%); z-index: -1; }
+        .container { max-width: 450px; margin: auto; padding: 20px; }
+        .card { background: var(--glass); border-radius: 30px; padding: 30px; color: #111; box-shadow: 0 20px 40px rgba(0,0,0,0.5); margin-top: 20px; border: 1px solid var(--gold); position: relative; }
+        
+        h1 { color: var(--gold); font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin: 0; font-size: 1.8em; text-align: center; }
+        .subtitle { color: #aaa; font-size: 0.8em; text-align: center; margin-bottom: 20px; }
+
+        .btn { border: none; padding: 16px; border-radius: 15px; font-weight: 600; cursor: pointer; transition: 0.3s; width: 100%; font-family: inherit; margin-top: 10px; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), #1b5e20); color: var(--gold); border: 1px solid var(--gold); }
+        .btn-gold { background: linear-gradient(135deg, var(--gold), #b8860b); color: #fff; }
+        .btn-outline { background: transparent; border: 1px solid #ccc; color: #666; font-size: 0.85em; padding: 10px; }
+
+        input, select { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; font-family: inherit; box-sizing: border-box; text-align: center; }
+
+        /* --- ANIMASI AMPLOP --- */
+        .grid-game { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+        
+        .game-item { 
+            background: #f0f0f0; height: 90px; border-radius: 18px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 1.5em; font-weight: bold; cursor: pointer; 
+            border-bottom: 5px solid #ddd; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        /* Efek Goyang (Wiggle) untuk Amplop yang Belum Dipilih */
+        .item-pancing:not(.taken):not(.selected-by-me) {
+            animation: wiggle 2.5s infinite ease-in-out;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+
+        .game-item:hover:not(.taken) { transform: scale(1.1) translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+        .game-item.selected-by-me { background: var(--gold) !important; color: white; border-color: #997a1d; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        .game-item.taken { background: #e0e0e0 !important; color: #bbb; cursor: not-allowed; border-bottom: none; opacity: 0.5; transform: scale(0.9); }
+        
+        .game-item.revealed { 
+            background: #fff !important; border: 2px solid var(--primary); 
+            color: var(--primary); font-size: 0.8em; 
+            animation: revealAnim 0.5s forwards;
+        }
+
+        @keyframes revealAnim {
+            0% { transform: rotateY(0); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        /* Slot Machine */
+        .slot-container { background: #000; padding: 25px; border-radius: 20px; border: 3px solid var(--gold); margin: 20px 0; }
+        .slot-display { height: 100px; display: flex; align-items: center; justify-content: center; font-size: 2em; font-weight: 800; color: var(--gold); }
+        .rolling { animation: slotBlur 0.1s infinite; }
+        @keyframes slotBlur { 0% { filter: blur(0px); opacity: 1; } 50% { filter: blur(4px); opacity: 0.7; } 100% { filter: blur(0px); opacity: 1; } }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.8em; }
+        th { text-align: left; padding: 10px; border-bottom: 2px solid #eee; }
+        td { padding: 10px; border-bottom: 1px solid #f9f9f9; font-weight: 600; }
     </style>
 </head>
 <body>
 
 <div class="stars"></div>
 <div class="container">
-    <h1 style="color:var(--gold); text-shadow: 2px 2px #000; margin-top: 20px;">🌙 THR SESSION 🌙</h1>
+    <h1>THR SESSION</h1>
+    <p class="subtitle">Yudi's Private Room v25.0</p>
 
     <div id="screen-start" class="card">
-        <button class="btn-main" onclick="goTo('screen-host-setup')">HOST (YUDI)</button>
-        <button class="btn-gold" onclick="goTo('screen-part-join')">PESERTA</button>
+        <button class="btn btn-primary" onclick="goTo('screen-host-setup')">MASUK SEBAGAI HOST</button>
+        <button class="btn btn-gold" onclick="goTo('screen-part-join')">MASUK SEBAGAI PESERTA</button>
     </div>
 
     <div id="screen-host-setup" class="card" style="display:none;">
-        <h3>Admin Setup</h3>
+        <h3>Pengaturan Room</h3>
         <input type="password" id="host-pass" placeholder="Password Admin">
-        <input type="number" id="host-budget" placeholder="Total Budget" value="1000000">
-        <button class="btn-main" onclick="createSession()">LANJUT KE LOBBY 🚀</button>
-        <button class="btn-outline" onclick="goTo('screen-start')">Kembali</button>
+        <input type="number" id="host-budget" placeholder="Total Budget (Rp)" value="1000000">
+        <button class="btn btn-primary" onclick="initHost()">BUAT SESI 🚀</button>
+        <button class="btn btn-outline" onclick="goTo('screen-start')">Kembali</button>
     </div>
 
     <div id="screen-host-lobby" class="card" style="display:none;">
-        <div id="qr-code" style="background:white; padding:10px; display:inline-block; border-radius:10px;"></div>
-        <p>KODE: <strong id="display-session-id" style="color:var(--primary); font-size:1.5em;">----</strong></p>
+        <div id="qr-code" style="background:#fff; padding:10px; display:inline-block; border-radius:15px; margin-bottom:15px;"></div>
+        <div style="font-weight: 800; color: var(--primary);">KODE JOIN: <span id="display-session-id">----</span></div>
         <select id="select-game-type">
             <option value="angka">🔢 Game 1: Tebak Angka</option>
-            <option value="pancing">🎣 Game 2: Pancing Amplop</option>
+            <option value="pancing">🧧 Game 2: Pancing Amplop (Bergerak)</option>
             <option value="slot">🎰 Game 3: Slot Keberuntungan</option>
         </select>
-        <ul id="host-player-list" class="lobby-list"></ul>
-        <button class="btn-main" onclick="startNow()">MULAI GAME 🏁</button>
-        <button class="btn-outline" onclick="goTo('screen-host-setup')">Ganti Budget</button>
+        <div id="host-player-count" style="margin: 10px 0; font-size: 0.8em; color: #666;">Menunggu peserta...</div>
+        <button class="btn btn-primary" onclick="launchGame()">MULAI PERMAINAN 🏁</button>
     </div>
 
     <div id="screen-part-join" class="card" style="display:none;">
-        <input type="text" id="part-name" placeholder="Nama Anda">
+        <h3>Gabung Sesi</h3>
+        <input type="text" id="part-name" placeholder="Nama Lengkap">
         <input type="text" id="part-session-id" placeholder="Kode 4 Digit">
-        <button class="btn-main" onclick="joinSession()">GABUNG</button>
+        <button class="btn btn-primary" onclick="initParticipant()">GABUNG SEKARANG</button>
     </div>
 
     <div id="screen-part-lobby" class="card" style="display:none;">
-        <h3>Lobby</h3>
-        <p>Halo, <strong id="display-my-name">...</strong></p>
-        <ul id="part-player-list" class="lobby-list"></ul>
+        <div class="slot-display">⏳</div>
+        <p id="wait-msg">Tunggu ya, Yudi sedang memilih game...</p>
     </div>
 
     <div id="screen-game" class="card" style="display:none;">
-        <h3 id="game-title" style="margin:0; color:var(--primary);">Game</h3>
+        <div id="game-header" style="display:flex; justify-content:space-between; margin-bottom:10px;">
+            <span id="game-title-display" style="font-weight:800; color:var(--primary)">GAME</span>
+            <span id="my-name-tag" style="font-size:0.7em; background:#eee; padding:3px 8px; border-radius:8px;"></span>
+        </div>
         <div id="game-area"></div>
         
-        <div id="host-ui" style="display:none; margin-top:20px;">
-            <button class="btn-gold" onclick="revealAll()">🎁 BUKA SEMUA HADIAH</button>
-            <button class="btn-outline" onclick="resetGameSameSession()">Ulangi Game / Ganti Mode</button>
-            <div style="margin-top:20px; border-top: 1px solid #eee;">
-                <p style="font-size: 0.8em; font-weight: bold; margin-top:10px;">REKAP PESERTA (KHUSUS HOST):</p>
-                <table id="game-recap"></table>
+        <div id="host-panel" style="display:none; margin-top:20px; border-top: 1px solid #eee; padding-top:15px;">
+            <button class="btn btn-gold" id="btn-reveal-all" onclick="revealAll()">🎁 BUKA SEMUA HADIAH</button>
+            <button class="btn btn-outline" onclick="resetToLobby()">GANTI GAME / BUDGET</button>
+            <div style="overflow-x:auto">
+                <table id="host-table">
+                    <thead><tr><th>Nama</th><th>Hasil</th></tr></thead>
+                    <tbody id="host-recap-body"></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -106,45 +153,35 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let myName = "", currentSessionId = "", isHost = false, hasSelected = false, spoken = false;
+    let sessionData = null, myName = "", currentSessionId = "", isHost = false, hasPicked = false, spoken = false;
 
     function goTo(id) {
         document.querySelectorAll('.card').forEach(c => c.style.display = 'none');
         document.getElementById(id).style.display = 'block';
     }
 
-    function createSession() {
-        if(document.getElementById('host-pass').value !== "yudi123") return alert("Admin Only!");
+    function initHost() {
+        if(document.getElementById('host-pass').value !== "yudi123") return alert("Password Salah!");
         isHost = true;
         if(!currentSessionId) currentSessionId = Math.floor(1000 + Math.random() * 9000).toString();
-        db.ref('active_sessions/' + currentSessionId).update({ status: 'lobby', budget: parseInt(document.getElementById('host-budget').value), showResults: false, selections: null });
+        db.ref('active_sessions/' + currentSessionId).update({
+            status: 'lobby',
+            budget: parseInt(document.getElementById('host-budget').value) || 1000000,
+            showResults: false,
+            selections: null
+        });
         document.getElementById('display-session-id').innerText = currentSessionId;
         document.getElementById("qr-code").innerHTML = "";
         new QRCode(document.getElementById("qr-code"), { text: currentSessionId, width: 120, height: 120 });
         goTo('screen-host-lobby');
-        listenSesi();
+        syncSession();
     }
 
-    function resetGameSameSession() {
-        spoken = false; hasSelected = false;
-        db.ref('active_sessions/' + currentSessionId).update({ status: 'lobby', showResults: false, selections: null, budgetList: null });
-    }
-
-    function joinSession() {
-        myName = document.getElementById('part-name').value.trim();
-        currentSessionId = document.getElementById('part-session-id').value.trim();
-        if(!myName || !currentSessionId) return alert("Lengkapi data!");
-        db.ref('active_sessions/' + currentSessionId + '/players/' + myName).set(true).then(() => {
-            document.getElementById('display-my-name').innerText = myName;
-            goTo('screen-part-lobby');
-            listenSesi();
-        });
-    }
-
-    function startNow() {
+    function launchGame() {
         const type = document.getElementById('select-game-type').value;
         db.ref('active_sessions/' + currentSessionId).once('value', snap => {
-            const players = Object.keys(snap.val().players || {});
+            const players = snap.val().players ? Object.keys(snap.val().players) : [];
+            if(players.length === 0) return alert("Belum ada peserta!");
             let list = [], budget = snap.val().budget;
             let jackpot = Math.round((budget * 0.4) / 1000) * 1000;
             let sisa = budget - jackpot;
@@ -156,130 +193,134 @@
         });
     }
 
-    function listenSesi() {
-        db.ref('active_sessions/' + currentSessionId).on('value', snap => {
-            const data = snap.val();
-            if(!data) return;
-            const players = data.players ? Object.keys(data.players) : [];
-            document.getElementById(isHost ? 'host-player-list' : 'part-player-list').innerHTML = players.map(p => `<li class="lobby-item">${p}</li>`).join('');
+    function resetToLobby() {
+        hasPicked = false; spoken = false;
+        db.ref('active_sessions/' + currentSessionId).update({ status: 'lobby', selections: null, showResults: false });
+    }
 
-            if(data.status === 'playing') {
-                goTo('screen-game');
-                renderGame(data, players);
-            } else if(data.status === 'lobby') {
-                goTo(isHost ? 'screen-host-lobby' : 'screen-part-lobby');
-            }
+    function initParticipant() {
+        myName = document.getElementById('part-name').value.trim();
+        currentSessionId = document.getElementById('part-session-id').value.trim();
+        if(!myName || !currentSessionId) return alert("Isi Nama & Kode!");
+        db.ref(`active_sessions/${currentSessionId}/players/${myName}`).set(true).then(() => {
+            document.getElementById('my-name-tag').innerText = myName;
+            goTo('screen-part-lobby');
+            syncSession();
         });
     }
 
-    function renderGame(data, players) {
+    function syncSession() {
+        db.ref('active_sessions/' + currentSessionId).on('value', snap => {
+            sessionData = snap.val();
+            if(!sessionData) return;
+            const players = sessionData.players ? Object.keys(sessionData.players) : [];
+            if(isHost) document.getElementById('host-player-count').innerText = `${players.length} Peserta Terhubung`;
+            if(sessionData.status === 'playing') { goTo('screen-game'); renderGameUI(); }
+            else if(sessionData.status === 'lobby') { goTo(isHost ? 'screen-host-lobby' : 'screen-part-lobby'); }
+        });
+    }
+
+    function renderGameUI() {
         const area = document.getElementById('game-area');
-        document.getElementById('game-title').innerText = data.gameType.toUpperCase();
-        
+        const type = sessionData.gameType;
+        document.getElementById('game-title-display').innerText = type.toUpperCase();
         if(isHost) {
-            document.getElementById('host-ui').style.display = 'block';
-            area.innerHTML = `<p style="color:var(--primary); font-weight:bold;">Sesi ${data.gameType} Sedang Berlangsung...</p>`;
-            renderHostRecap(data, players);
+            document.getElementById('host-panel').style.display = 'block';
+            document.getElementById('btn-reveal-all').style.display = (type === 'slot') ? 'none' : 'block';
+            area.innerHTML = `<p style="text-align:center; color:#888;">Monitoring Sesi: ${type}</p>`;
+            renderHostRecap();
         } else {
-            document.getElementById('host-ui').style.display = 'none';
-            if(data.gameType === 'slot') renderSlotPeserta(data);
-            else renderGridPeserta(data);
+            document.getElementById('host-panel').style.display = 'none';
+            if(type === 'slot') renderSlot(); else renderGrid();
         }
     }
 
-    function renderGridPeserta(data) {
+    function renderGrid() {
         const area = document.getElementById('game-area');
         area.innerHTML = `<div class="grid-game"></div>`;
         const grid = area.querySelector('.grid-game');
-        
-        data.budgetList.forEach((val, i) => {
-            const claimer = data.selections ? data.selections[i] : null;
+        sessionData.budgetList.forEach((val, i) => {
+            const selection = sessionData.selections ? sessionData.selections[i] : null;
             const btn = document.createElement('div');
-            
-            let isMine = claimer && claimer.name === myName;
-            let status = "";
-            if (data.showResults && isMine) status = "revealed";
-            else if (isMine) status = "selected-by-me";
-            else if (claimer) status = "taken";
-            
-            btn.className = `game-item ${status}`;
-            
-            if(data.showResults && isMine) {
+            let isMine = selection && selection.name === myName;
+            let css = "game-item";
+            if(sessionData.gameType === 'pancing') css += " item-pancing";
+            if(sessionData.showResults && isMine) css += " revealed";
+            else if(isMine) css += " selected-by-me";
+            else if(selection) css += " taken";
+            btn.className = css;
+            if(sessionData.showResults && isMine) {
                 btn.innerText = `Rp${val.toLocaleString()}`;
-                playVoice(`Selamat ${myName}, kamu mendapatkan THR sebesar ${val} rupiah!`);
-            } else if(claimer) {
+                handleVoice(val);
+            } else if(selection) {
                 btn.innerText = isMine ? "SAYA" : "OK";
             } else {
-                btn.innerText = (data.gameType === 'angka') ? i + 1 : "🧧";
+                btn.innerText = (sessionData.gameType === 'angka') ? (i+1) : "🧧";
             }
-
-            btn.onclick = () => { if(!hasSelected && !claimer && !data.showResults) pick(i, val); };
+            btn.onclick = () => { if(!hasPicked && !selection && !sessionData.showResults) securePick(i, val); };
             grid.appendChild(btn);
         });
     }
 
-    function renderSlotPeserta(data) {
+    function renderSlot() {
         const area = document.getElementById('game-area');
-        let myRes = null;
-        if(data.selections) Object.values(data.selections).forEach(s => { if(s.name === myName) myRes = s.val; });
-
-        if(myRes) {
-            area.innerHTML = `<div class="slot-window">💰 Rp${myRes.toLocaleString()}</div><p>Hore! Selamat ya!</p>`;
-            playVoice(`Selamat ${myName}, kamu mendapatkan THR sebesar ${myRes} rupiah!`);
+        let myWin = null;
+        if(sessionData.selections) Object.values(sessionData.selections).forEach(s => { if(s.name === myName) myWin = s.val; });
+        if(myWin) {
+            area.innerHTML = `<div class="slot-container"><div class="slot-display">Rp${myWin.toLocaleString()}</div></div><p style="text-align:center;color:#333;">Selamat!</p>`;
+            handleVoice(myWin);
         } else {
-            area.innerHTML = `<div id="slot-box" class="slot-window">🎰</div><button class="btn-main" onclick="spinSlot()">SPIN SEKARANG!</button>`;
+            area.innerHTML = `<div class="slot-container"><div id="slot-box" class="slot-display">🎰</div></div>
+                              <button class="btn btn-gold" onclick="secureSlotSpin()">PUTAR SEKARANG</button>`;
         }
     }
 
-    function pick(i, v) {
-        hasSelected = true;
-        db.ref(`active_sessions/${currentSessionId}/selections/${i}`).set({ name: myName, val: v });
+    function securePick(index, value) {
+        db.ref(`active_sessions/${currentSessionId}/selections/${index}`).transaction(curr => {
+            if (curr === null) return { name: myName, val: value };
+            else return;
+        }, (err, ok) => { if (ok) hasPicked = true; else alert("Sudah diambil orang lain!"); });
     }
 
-    function spinSlot() {
+    function secureSlotSpin() {
         const box = document.getElementById('slot-box');
         box.classList.add('rolling');
-        db.ref(`active_sessions/${currentSessionId}`).once('value', snap => {
-            const data = snap.val();
-            let taken = data.selections ? Object.keys(data.selections).map(Number) : [];
-            let avail = data.budgetList.map((_, i) => i).filter(i => !taken.includes(i));
-            let myIdx = avail[Math.floor(Math.random() * avail.length)];
-            let myVal = data.budgetList[myIdx];
-            setTimeout(() => {
-                db.ref(`active_sessions/${currentSessionId}/selections/${myIdx}`).set({ name: myName, val: myVal });
-                confetti();
-            }, 2000);
-        });
+        setTimeout(() => {
+            db.ref(`active_sessions/${currentSessionId}`).once('value', snap => {
+                const data = snap.val();
+                let taken = data.selections ? Object.keys(data.selections).map(Number) : [];
+                let avail = data.budgetList.map((_, i) => i).filter(i => !taken.includes(i));
+                let targetIdx = avail[Math.floor(Math.random() * avail.length)];
+                let targetVal = data.budgetList[targetIdx];
+                db.ref(`active_sessions/${currentSessionId}/selections/${targetIdx}`).transaction(c => c === null ? {name: myName, val: targetVal} : undefined, (err, ok) => {
+                    if(ok) confetti(); else secureSlotSpin();
+                });
+            });
+        }, 2000);
     }
 
-    function renderHostRecap(data, players) {
-        const recap = document.getElementById('game-recap');
-        recap.innerHTML = "<tr><th>Nama</th><th>Hasil</th></tr>";
-        players.forEach(p => {
-            let win = "Menunggu...";
-            if(data.selections) {
-                Object.values(data.selections).forEach(sel => {
-                    if(sel.name === p) win = data.showResults ? `Rp${sel.val.toLocaleString()}` : "✅ Sudah";
+    function renderHostRecap() {
+        const body = document.getElementById('host-recap-body');
+        body.innerHTML = "";
+        Object.keys(sessionData.players || {}).forEach(p => {
+            let win = "---";
+            if(sessionData.selections) {
+                Object.values(sessionData.selections).forEach(s => {
+                    if(s.name === p) win = sessionData.showResults ? `Rp${s.val.toLocaleString()}` : `<span style="color:green">✔ Terpilih</span>`;
                 });
             }
-            recap.innerHTML += `<tr><td>${p}</td><td style="color:var(--primary); font-weight:bold">${win}</td></tr>`;
+            body.innerHTML += `<tr><td>${p}</td><td>${win}</td></tr>`;
         });
     }
 
-    function playVoice(text) {
-        if (!spoken) {
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'id-ID';
-            msg.rate = 0.9;
-            window.speechSynthesis.speak(msg);
-            spoken = true;
-        }
+    function handleVoice(amt) {
+        if(spoken) return;
+        spoken = true;
+        const msg = new SpeechSynthesisUtterance(`Selamat ${myName}, kamu mendapatkan T H R sebesar ${amt} rupiah!`);
+        msg.lang = 'id-ID'; window.speechSynthesis.speak(msg);
     }
 
-    function revealAll() {
-        db.ref(`active_sessions/${currentSessionId}/showResults`).set(true);
-        confetti();
-    }
+    function revealAll() { db.ref(`active_sessions/${currentSessionId}/showResults`).set(true); confetti(); }
 </script>
 </body>
 </html>
