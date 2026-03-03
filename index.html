@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THR Sesi Online - Keluarga Yudi v16.0</title>
+    <title>THR Sesi Online - Keluarga Yudi v16.1</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
@@ -14,86 +14,78 @@
         :root { --primary: #1b5e20; --gold: #ffd700; --white: #ffffff; }
         body { font-family: 'Poppins', sans-serif; background: radial-gradient(circle, #1b5e20 0%, #002200 100%); color: var(--white); margin: 0; padding: 0; min-height: 100vh; }
         .container { max-width: 500px; margin: auto; padding: 20px; text-align: center; }
-        .card { background: white; border-radius: 20px; padding: 25px; color: #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-top: 20px; }
-        .btn-main { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1.1em; box-shadow: 0 4px #003300; }
-        .btn-gold { background: var(--gold); color: #000; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 4px #b8860b; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1em; }
+        .card { background: white; border-radius: 20px; padding: 25px; color: #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-top: 20px; transition: 0.3s; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1.1em; }
+        .btn-gold { background: var(--gold); color: #000; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         .lobby-list { list-style: none; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-        .lobby-item { background: #e8f5e9; padding: 10px; border-radius: 8px; font-weight: 600; color: var(--primary); border: 1px solid #c8e6c9; }
-        #qr-code { display: flex; justify-content: center; margin: 15px 0; background: white; padding: 10px; border-radius: 10px; display: inline-block; }
-        #reader { width: 100%; border-radius: 15px; overflow: hidden; margin-top: 10px; border: 2px solid var(--gold); }
-        .badge { background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8em; }
+        .lobby-item { background: #e8f5e9; padding: 8px; border-radius: 8px; font-weight: 600; color: var(--primary); font-size: 0.9em; }
+        #qr-code { display: inline-block; background: white; padding: 10px; border-radius: 10px; margin: 15px 0; }
+        #reader { width: 100%; border-radius: 15px; overflow: hidden; margin-top: 10px; }
         .grid-angka { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
         .num-btn { background: #eee; height: 75px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; font-weight: bold; cursor: pointer; border-bottom: 5px solid #ccc; }
         .num-btn.revealed { background: var(--primary); color: white; border: none; font-size: 0.8em; }
+        .badge { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75em; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1 style="color:var(--gold); text-shadow: 2px 2px #000; margin-bottom: 0;">🌙 THR SESSION 🌙</h1>
-    <p style="font-size: 0.7em; margin-bottom: 20px;">v16.0 - Real-time Lobby & Sync</p>
+    <h1 style="color:var(--gold); text-shadow: 2px 2px #000;">🌙 THR SESSION 🌙</h1>
 
     <div id="screen-start" class="card">
         <h2 style="color: var(--primary);">Selamat Datang</h2>
-        <p>Silakan pilih peran untuk sesi ini:</p>
-        <button class="btn-main" onclick="switchScreen('screen-host-setup')">HOST (Buka Sesi)</button>
-        <button class="btn-gold" onclick="switchScreen('screen-part-join')">PESERTA (Gabung)</button>
+        <button class="btn-main" onclick="goTo('screen-host-setup')">HOST (Buka Sesi)</button>
+        <button class="btn-gold" onclick="goTo('screen-part-join')">PESERTA (Gabung)</button>
     </div>
 
     <div id="screen-host-setup" class="card" style="display:none;">
-        <h3 style="color: var(--primary);">Atur Sesi THR</h3>
-        <input type="password" id="host-pass" placeholder="Password Admin (yudi123)">
+        <h3 style="color: var(--primary);">Buat Sesi Baru</h3>
+        <input type="password" id="host-pass" placeholder="Password Admin">
         <input type="number" id="host-budget" placeholder="Total Budget (Rp)" value="500000">
-        <button class="btn-main" onclick="createSession()">BUAT KODE SESI 🚀</button>
-        <button onclick="switchScreen('screen-start')" style="background:none; border:none; color:#999; margin-top:15px; cursor:pointer;">← Kembali</button>
+        <button class="btn-main" onclick="createSession()">GENERATE KODE SESI 🚀</button>
+        <button onclick="goTo('screen-start')" style="background:none; border:none; color:#999; margin-top:15px;">← Kembali</button>
     </div>
 
     <div id="screen-host-lobby" class="card" style="display:none;">
-        <h3 style="margin-bottom:5px;">Lobby Host</h3>
-        <div id="qr-area"><div id="qr-code"></div></div>
-        <p>Kode Join: <strong id="display-session-id" style="font-size: 1.8em; color: var(--primary); letter-spacing: 2px;">----</strong></p>
-        <div class="badge">Peserta Terhubung: <span id="count-p">0</span></div>
+        <h3 style="margin-bottom:0;">Lobby Host</h3>
+        <div id="qr-code"></div>
+        <p style="margin:0;">Kode Join: <strong id="display-session-id" style="font-size: 1.8em; color: var(--primary);">----</strong></p>
+        <div class="badge">Peserta: <span id="count-p">0</span></div>
         <ul id="host-player-list" class="lobby-list"></ul>
-        <select id="select-game-type" style="width:100%; padding:12px; margin:10px 0; border-radius:10px; border:2px solid #ddd;">
+        <select id="select-game-type" style="width:100%; padding:10px; margin:10px 0; border-radius:10px;">
             <option value="angka">🔢 Game Tebak Angka</option>
-            <option value="bar">🎰 Game Slot Bar</option>
-            <option value="pancing">🎣 Game Pancing Amplop</option>
         </select>
-        <button class="btn-main" onclick="startNow()">MULAI GAME SEKARANG 🏁</button>
+        <button class="btn-main" onclick="startNow()">MULAI GAME 🏁</button>
     </div>
 
     <div id="screen-part-join" class="card" style="display:none;">
-        <h3 style="color: var(--primary);">Gabung Sesi</h3>
-        <input type="text" id="part-name" placeholder="Nama Lengkap">
+        <h3 style="color: var(--primary);">Gabung Game</h3>
+        <input type="text" id="part-name" placeholder="Nama Kamu">
         <div id="reader" style="display:none;"></div>
-        <button class="btn-gold" id="btn-scan" onclick="startScanner()">📷 SCAN QR CODE</button>
-        <p style="margin: 10px 0; font-size: 0.8em; color: #666;">-- ATAU --</p>
-        <input type="text" id="part-session-id" placeholder="Masukkan 4 Digit Kode">
-        <button class="btn-main" onclick="joinSession()">MASUK KE LOBBY</button>
-        <button onclick="switchScreen('screen-start')" style="background:none; border:none; color:#999; margin-top:15px; cursor:pointer;">← Kembali</button>
+        <button class="btn-gold" onclick="startScanner()">📷 SCAN QR CODE</button>
+        <input type="text" id="part-session-id" placeholder="Masukkan Kode 4 Digit">
+        <button class="btn-main" onclick="joinSession()">MASUK LOBBY</button>
+        <button onclick="goTo('screen-start')" style="background:none; border:none; color:#999; margin-top:15px;">← Kembali</button>
     </div>
 
     <div id="screen-part-lobby" class="card" style="display:none;">
-        <h2 style="color: var(--primary);">Berhasil Masuk!</h2>
+        <h2 style="color: var(--primary);">Berhasil Join!</h2>
         <p>Halo, <strong id="display-my-name" style="color: var(--primary);">...</strong></p>
         <div class="badge">Menunggu Host Memulai...</div>
-        <p style="font-size: 0.8em; color: #666; margin-top: 15px;">Daftar Peserta Lain:</p>
         <div class="lobby-list" id="part-player-list"></div>
     </div>
 
     <div id="screen-game" class="card" style="display:none;">
-        <h2 id="game-title" style="color: var(--primary); margin-bottom: 5px;">Game Dimulai!</h2>
-        <div id="game-status-info" style="font-size: 0.8em; margin-bottom: 15px; color: #666;"></div>
+        <h2 id="game-title" style="color: var(--primary);">Game</h2>
         <div id="game-content"></div>
-        <div class="recap-container">
-            <table style="width:100%; font-size:0.8em; margin-top:20px; border-top: 1px solid #eee;" id="game-recap"></table>
+        <div id="recap-area" style="margin-top:20px; border-top:1px solid #eee;">
+            <table id="game-recap" style="width:100%; font-size:0.8em; margin-top:10px;"></table>
         </div>
     </div>
 </div>
 
 <script>
-    // Konfigurasi Firebase Yudi
     const firebaseConfig = {
         apiKey: "AIzaSyAKuKWKtrcCnZdBPDo3X41Xv5ydKYSaSEs",
         authDomain: "thr-yudi.firebaseapp.com",
@@ -110,66 +102,78 @@
     let currentSessionId = "";
     let isHost = false;
 
-    function switchScreen(screenId) {
+    function goTo(id) {
         document.querySelectorAll('.card').forEach(c => c.style.display = 'none');
-        document.getElementById(screenId).style.display = 'block';
+        document.getElementById(id).style.display = 'block';
     }
 
-    // --- HOST LOGIC ---
     function createSession() {
-        const pass = document.getElementById('host-pass').value;
-        const budget = parseInt(document.getElementById('host-budget').value);
-
-        if(pass !== "yudi123") return alert("Password Admin Salah!");
-        if(!budget || budget < 1000) return alert("Masukkan total budget yang valid!");
-
+        if(document.getElementById('host-pass').value !== "yudi123") return alert("Password Salah!");
         isHost = true;
         currentSessionId = Math.floor(1000 + Math.random() * 9000).toString();
-        
+        const budget = parseInt(document.getElementById('host-budget').value);
+
         db.ref('sessions/' + currentSessionId).set({
             status: 'lobby',
             budget: budget,
-            gameType: 'angka',
-            players: {},
-            createdAt: Date.now()
+            players: {}
         }).then(() => {
             document.getElementById('display-session-id').innerText = currentSessionId;
-            switchScreen('screen-host-lobby');
-            
-            // Clear QR area and generate new one
+            goTo('screen-host-lobby');
             document.getElementById("qr-code").innerHTML = "";
-            new QRCode(document.getElementById("qr-code"), {
-                text: currentSessionId,
-                width: 150,
-                height: 150
+            new QRCode(document.getElementById("qr-code"), { text: currentSessionId, width: 140, height: 140 });
+            listenSesi();
+        }).catch(e => alert(e.message));
+    }
+
+    function joinSession() {
+        myName = document.getElementById('part-name').value;
+        currentSessionId = document.getElementById('part-session-id').value;
+        if(!myName || !currentSessionId) return alert("Isi Nama & Kode!");
+
+        db.ref('sessions/' + currentSessionId).once('value', snap => {
+            if(!snap.exists()) return alert("Sesi tidak ada!");
+            db.ref('sessions/' + currentSessionId + '/players/' + myName).set(true).then(() => {
+                document.getElementById('display-my-name').innerText = myName;
+                goTo('screen-part-lobby');
+                listenSesi();
             });
+        });
+    }
+
+    function listenSesi() {
+        db.ref('sessions/' + currentSessionId).on('value', snap => {
+            const data = snap.val();
+            if(!data) return;
             
-            listenToSession();
-        }).catch(err => alert("Gagal membuat sesi: " + err.message));
+            const players = data.players ? Object.keys(data.players) : [];
+            const html = players.map(p => `<div class="lobby-item">${p}</div>`).join('');
+            document.getElementById(isHost ? 'host-player-list' : 'part-player-list').innerHTML = html;
+            if(isHost) document.getElementById('count-p').innerText = players.length;
+
+            if(data.status === 'playing') {
+                goTo('screen-game');
+                renderGame(data);
+            }
+        });
     }
 
     function startNow() {
-        const type = document.getElementById('select-game-type').value;
         db.ref('sessions/' + currentSessionId).once('value', snap => {
             const data = snap.val();
-            const players = data.players ? Object.keys(data.players) : [];
-            if(players.length === 0) return alert("Belum ada peserta yang gabung!");
+            const players = Object.keys(data.players || {});
+            if(players.length === 0) return alert("Belum ada peserta!");
 
-            // Algoritma Bagi Hadiah Otomatis
             let list = [];
-            let jackpot = Math.round((data.budget * 0.35) / 1000) * 1000;
+            let jackpot = Math.round((data.budget * 0.4) / 1000) * 1000;
             let sisa = data.budget - jackpot;
             let base = Math.floor(sisa / (players.length > 1 ? players.length - 1 : 1));
-            
             list.push(jackpot);
-            for(let i=0; i < players.length - 1; i++){
-                list.push(Math.round((base * (0.8 + Math.random() * 0.4)) / 1000) * 1000);
-            }
+            for(let i=0; i<players.length-1; i++) list.push(Math.round((base * (0.8 + Math.random()*0.4))/1000)*1000);
             list.sort(() => Math.random() - 0.5);
 
             db.ref('sessions/' + currentSessionId).update({
                 status: 'playing',
-                gameType: type,
                 budgetList: list,
                 fullOriginalList: list,
                 revealed: {},
@@ -178,101 +182,43 @@
         });
     }
 
-    // --- PARTICIPANT LOGIC ---
-    function startScanner() {
-        document.getElementById('reader').style.display = 'block';
-        const html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start(
-            { facingMode: "environment" }, 
-            { fps: 10, qrbox: { width: 250, height: 250 } },
-            (decodedText) => {
-                document.getElementById('part-session-id').value = decodedText;
-                html5QrCode.stop();
-                document.getElementById('reader').style.display = 'none';
-            }
-        ).catch(err => {
-            alert("Kamera tidak diizinkan atau tidak ditemukan.");
-            document.getElementById('reader').style.display = 'none';
-        });
-    }
-
-    function joinSession() {
-        myName = document.getElementById('part-name').value;
-        currentSessionId = document.getElementById('part-session-id').value;
-
-        if(!myName || !currentSessionId) return alert("Lengkapi Nama dan Kode Sesi!");
-
-        db.ref('sessions/' + currentSessionId).once('value', snap => {
-            if(!snap.exists()) return alert("Sesi tidak ditemukan atau sudah berakhir.");
-            
-            db.ref('sessions/' + currentSessionId + '/players/' + myName).set(true)
-            .then(() => {
-                document.getElementById('display-my-name').innerText = myName;
-                switchScreen('screen-part-lobby');
-                listenToSession();
-            });
-        });
-    }
-
-    // --- REAL-TIME SYNC ---
-    function listenToSession() {
-        db.ref('sessions/' + currentSessionId).on('value', snap => {
-            const data = snap.val();
-            if(!data) return;
-
-            // Update Lobby
-            const pList = data.players ? Object.keys(data.players) : [];
-            const listHtml = pList.map(p => `<div class="lobby-item">${p}</div>`).join('');
-            
-            if(isHost) {
-                document.getElementById('host-player-list').innerHTML = listHtml;
-                document.getElementById('count-p').innerText = pList.length;
-            } else {
-                document.getElementById('part-player-list').innerHTML = listHtml;
-            }
-
-            // Sync Game State
-            if(data.status === 'playing') {
-                switchScreen('screen-game');
-                renderGameUI(data);
-            }
-        });
-    }
-
-    function renderGameUI(data) {
-        document.getElementById('game-title').innerText = "Game " + data.gameType.toUpperCase();
+    function renderGame(data) {
         const content = document.getElementById('game-content');
+        content.innerHTML = `<div class="grid-angka"></div>`;
+        const grid = content.querySelector('.grid-angka');
         
-        if(data.gameType === 'angka') {
-            content.innerHTML = `<div class="grid-angka"></div>`;
-            const grid = content.querySelector('.grid-angka');
-            data.fullOriginalList.forEach((val, i) => {
-                const isOpened = data.revealed && data.revealed[i];
-                const btn = document.createElement('div');
-                btn.className = `num-btn ${isOpened ? 'revealed' : ''}`;
-                btn.innerText = isOpened ? "Rp" + val.toLocaleString() : i + 1;
-                btn.onclick = () => {
-                    if(!isOpened) {
-                        db.ref(`sessions/${currentSessionId}/revealed/${i}`).set(myName || "Host");
-                        db.ref(`sessions/${currentSessionId}/history`).push({
-                            name: myName || "Host",
-                            win: val
-                        });
-                        confetti();
-                    }
-                };
-                grid.appendChild(btn);
-            });
-        }
-        
-        // Update Recap
+        data.fullOriginalList.forEach((val, i) => {
+            const isOpened = data.revealed && data.revealed[i];
+            const btn = document.createElement('div');
+            btn.className = `num-btn ${isOpened ? 'revealed' : ''}`;
+            btn.innerText = isOpened ? "Rp" + val.toLocaleString() : i + 1;
+            btn.onclick = () => {
+                if(!isOpened) {
+                    db.ref(`sessions/${currentSessionId}/revealed/${i}`).set(myName || "Host");
+                    db.ref(`sessions/${currentSessionId}/history`).push({ name: myName || "Host", win: val });
+                    confetti();
+                }
+            };
+            grid.appendChild(btn);
+        });
+
         const recap = document.getElementById('game-recap');
-        recap.innerHTML = "<tr><th>Nama</th><th>Hasil</th></tr>";
+        recap.innerHTML = "<tr><th>Nama</th><th>Dapat</th></tr>";
         if(data.history) {
             Object.values(data.history).forEach(h => {
                 recap.innerHTML += `<tr><td>${h.name}</td><td>Rp${h.win.toLocaleString()}</td></tr>`;
             });
         }
+    }
+
+    function startScanner() {
+        document.getElementById('reader').style.display='block';
+        const scanner = new Html5Qrcode("reader");
+        scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => {
+            document.getElementById('part-session-id').value = txt;
+            scanner.stop();
+            document.getElementById('reader').style.display='none';
+        });
     }
 </script>
 </body>
