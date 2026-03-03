@@ -3,33 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THR Online Keluarga Yudi v18.0</title>
+    <title>THR Online v21.0 - Multi Game Sesi</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #1b5e20; --gold: #ffd700; --white: #ffffff; }
-        body { font-family: 'Poppins', sans-serif; background: radial-gradient(circle, #1b5e20 0%, #002200 100%); color: var(--white); margin: 0; padding: 0; min-height: 100vh; overflow-x: hidden; }
+        body { font-family: 'Poppins', sans-serif; background: #002200; color: var(--white); margin: 0; padding: 0; min-height: 100vh; overflow-x: hidden; }
         .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/stardust.png'); z-index: -1; }
         .container { max-width: 480px; margin: auto; padding: 20px; text-align: center; }
         .card { background: rgba(255, 255, 255, 0.95); border-radius: 25px; padding: 25px; color: #333; box-shadow: 0 15px 35px rgba(0,0,0,0.6); margin-top: 20px; border: 1px solid var(--gold); }
         .btn-main { background: linear-gradient(135deg, var(--primary), #003300); color: var(--gold); border: 2px solid var(--gold); padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1.1em; }
         .btn-gold { background: linear-gradient(135deg, var(--gold), #b8860b); color: #000; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; text-align: center; font-family: inherit; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 10px; text-align: center; font-family: inherit; }
         .lobby-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0; list-style: none; margin: 15px 0; }
         .lobby-item { background: #f1f8e9; padding: 10px; border-radius: 10px; font-weight: 600; color: var(--primary); border: 1px solid #c8e6c9; font-size: 0.85em; }
-        #qr-code { background: white; padding: 10px; border-radius: 10px; display: inline-block; margin: 10px 0; border: 2px solid var(--gold); }
         
-        /* Game UI */
+        /* Game Visuals */
         .grid-game { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .game-item { background: #eee; height: 85px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; font-weight: bold; cursor: pointer; border-bottom: 5px solid #ccc; position: relative; overflow: hidden; }
-        .game-item.revealed { background: white; border: 2px solid var(--primary); color: var(--primary); font-size: 0.75em; border-bottom: none; }
-        .slot-box { font-size: 3em; background: #000; color: gold; padding: 20px; border-radius: 15px; margin: 15px 0; border: 4px solid var(--gold); }
-        table { width: 100%; font-size: 0.8em; margin-top: 15px; border-collapse: collapse; }
-        th, td { padding: 8px; border-bottom: 1px solid #eee; }
+        .game-item { background: #eee; height: 80px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; font-weight: bold; cursor: pointer; border-bottom: 5px solid #ccc; transition: 0.2s; }
+        .game-item.selected-by-me { background: #ffd700 !important; border-color: #b8860b; transform: scale(0.95); }
+        .game-item.taken { background: #ccc !important; color: #999; cursor: not-allowed; border-bottom: none; }
+        .game-item.revealed { background: white !important; border: 2px solid var(--primary); color: var(--primary); font-size: 0.8em; border-bottom: none; }
+        
+        /* Slot Animation */
+        .slot-machine { background: #000; padding: 20px; border-radius: 15px; border: 4px solid var(--gold); margin: 20px 0; }
+        .slot-window { background: white; height: 100px; display: flex; align-items: center; justify-content: center; font-size: 3em; border-radius: 10px; overflow: hidden; }
+        .rolling { animation: blur 0.1s infinite; }
+        @keyframes blur { 0% { filter: blur(0px); } 50% { filter: blur(5px); } 100% { filter: blur(0px); } }
+
+        table { width: 100%; font-size: 0.85em; margin-top: 15px; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
     </style>
 </head>
 <body>
@@ -39,70 +45,57 @@
     <h1 style="color:var(--gold); text-shadow: 2px 2px #000; margin-top: 20px;">🌙 THR SESSION 🌙</h1>
 
     <div id="screen-start" class="card">
-        <h2 style="color: var(--primary);">Pilih Peran</h2>
-        <button class="btn-main" onclick="goTo('screen-host-setup')">HOST (PEMBERI)</button>
-        <button class="btn-gold" onclick="goTo('screen-part-join')">PESERTA (PENERIMA)</button>
+        <button class="btn-main" onclick="goTo('screen-host-setup')">HOST (YUDI)</button>
+        <button class="btn-gold" onclick="goTo('screen-part-join')">PESERTA</button>
     </div>
 
     <div id="screen-host-setup" class="card" style="display:none;">
-        <h3 style="color: var(--primary);">Setup Sesi</h3>
+        <h3>Setup Sesi</h3>
         <input type="password" id="host-pass" placeholder="Password Admin">
-        <input type="number" id="host-budget" placeholder="Total Budget (Rp)" value="1000000">
-        <button class="btn-main" onclick="createSession()">BUAT KODE & QR 🚀</button>
-        <button onclick="goTo('screen-start')" style="background:none; border:none; color:#999; margin-top:10px;">Kembali</button>
+        <input type="number" id="host-budget" placeholder="Total Budget" value="1000000">
+        <button class="btn-main" onclick="createSession()">BUAT RUANGAN 🚀</button>
     </div>
 
     <div id="screen-host-lobby" class="card" style="display:none;">
-        <h3 style="margin:0; color: var(--primary);">Ruang Tunggu Host</h3>
-        <div id="qr-code"></div>
-        <p style="margin:0; font-weight:bold;">KODE: <span id="display-session-id" style="color:var(--primary); font-size: 1.5em;">----</span></p>
-        
+        <div id="qr-code" style="background:white; padding:10px; display:inline-block; border-radius:10px;"></div>
+        <p>KODE: <strong id="display-session-id" style="color:var(--primary); font-size:1.5em;">----</strong></p>
         <select id="select-game-type">
-            <option value="angka">🔢 Tebak Angka (Grid)</option>
-            <option value="pancing">🎣 Pancing Amplop (Acak)</option>
-            <option value="slot">🎰 Slot Keberuntungan</option>
+            <option value="angka">🔢 Game 1: Tebak Angka</option>
+            <option value="pancing">🎣 Game 2: Pancing Amplop</option>
+            <option value="slot">🎰 Game 3: Slot Keberuntungan</option>
         </select>
-
-        <div style="margin-top: 15px;">
-            <p style="font-size: 0.8em; margin:0;">Peserta Terhubung (<span id="count-p">0</span>):</p>
-            <ul id="host-player-list" class="lobby-list"></ul>
-        </div>
-        <button class="btn-main" onclick="startNow()">MULAI GAME SEKARANG 🏁</button>
+        <ul id="host-player-list" class="lobby-list"></ul>
+        <button class="btn-main" onclick="startNow()">MULAI PERMAINAN 🏁</button>
     </div>
 
     <div id="screen-part-join" class="card" style="display:none;">
-        <h3 style="color: var(--primary);">Gabung Sesi</h3>
-        <input type="text" id="part-name" placeholder="Nama Kamu">
-        <div id="reader" style="display:none; margin-bottom: 10px; border-radius: 10px; overflow: hidden;"></div>
-        <button class="btn-gold" onclick="startScanner()">📷 SCAN QR HOST</button>
+        <input type="text" id="part-name" placeholder="Nama Anda">
         <input type="text" id="part-session-id" placeholder="Kode 4 Digit">
-        <button class="btn-main" onclick="joinSession()">MASUK KE LOBBY</button>
-        <button onclick="goTo('screen-start')" style="background:none; border:none; color:#999; margin-top:10px;">Kembali</button>
+        <button class="btn-main" onclick="joinSession()">GABUNG</button>
     </div>
 
     <div id="screen-part-lobby" class="card" style="display:none;">
-        <div style="padding: 20px;">
-            <h2 style="color: var(--primary); margin: 0;">Siap Bermain!</h2>
-            <p>Halo, <strong id="display-my-name">...</strong></p>
-            <p style="font-size: 0.8em; color: #666;">Tunggu Yudi menekan tombol mulai ya...</p>
-            <div class="lobby-list" id="part-player-list"></div>
-        </div>
+        <h3>Lobby</h3>
+        <p>Halo, <strong id="display-my-name">...</strong></p>
+        <p style="font-size:0.8em;">Menunggu Yudi memilih game...</p>
+        <ul id="part-player-list" class="lobby-list"></ul>
     </div>
 
     <div id="screen-game" class="card" style="display:none;">
-        <h2 id="game-title" style="color: var(--primary); margin: 0;">Game Dimulai</h2>
-        <p id="game-desc" style="font-size: 0.7em; color: #777; margin-bottom: 15px;"></p>
-        
+        <h3 id="game-title">Game Dimulai</h3>
         <div id="game-area"></div>
-
-        <div style="margin-top:20px; border-top: 1px solid #eee; padding-top: 10px;">
-            <p style="font-size: 0.8em; font-weight: bold;">RIWAYAT PEMENANG:</p>
+        <div id="host-controls" style="display:none; margin-top:20px;">
+            <button id="btn-reveal" class="btn-gold" onclick="revealAll()">🎁 BUKA SEMUA HADIAH</button>
+        </div>
+        <div style="margin-top:20px; border-top: 1px solid #eee;">
+            <p style="font-size: 0.8em; font-weight: bold; margin-top:10px;">REKAP HASIL:</p>
             <table id="game-recap"></table>
         </div>
     </div>
 </div>
 
 <script>
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
         apiKey: "AIzaSyAKuKWKtrcCnZdBPDo3X41Xv5ydKYSaSEs",
         authDomain: "thr-yudi.firebaseapp.com",
@@ -115,29 +108,36 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let myName = "";
-    let currentSessionId = "";
-    let isHost = false;
+    let myName = "", currentSessionId = "", isHost = false, hasSelected = false;
 
     function goTo(id) {
         document.querySelectorAll('.card').forEach(c => c.style.display = 'none');
         document.getElementById(id).style.display = 'block';
     }
 
-    // --- HOST ---
     function createSession() {
-        if(document.getElementById('host-pass').value !== "yudi123") return alert("Password Salah!");
+        if(document.getElementById('host-pass').value !== "yudi123") return alert("Salah!");
         isHost = true;
         currentSessionId = Math.floor(1000 + Math.random() * 9000).toString();
         db.ref('active_sessions/' + currentSessionId).set({
             status: 'lobby',
             budget: parseInt(document.getElementById('host-budget').value),
-            players: { "Host (Yudi)": true }
+            showResults: false
         }).then(() => {
             document.getElementById('display-session-id').innerText = currentSessionId;
             goTo('screen-host-lobby');
-            document.getElementById("qr-code").innerHTML = "";
-            new QRCode(document.getElementById("qr-code"), { text: currentSessionId, width: 140, height: 140 });
+            new QRCode(document.getElementById("qr-code"), { text: currentSessionId, width: 120, height: 120 });
+            listenSesi();
+        });
+    }
+
+    function joinSession() {
+        myName = document.getElementById('part-name').value.trim();
+        currentSessionId = document.getElementById('part-session-id').value.trim();
+        if(!myName || !currentSessionId) return alert("Isi Data!");
+        db.ref('active_sessions/' + currentSessionId + '/players/' + myName).set(true).then(() => {
+            document.getElementById('display-my-name').innerText = myName;
+            goTo('screen-part-lobby');
             listenSesi();
         });
     }
@@ -146,10 +146,7 @@
         const type = document.getElementById('select-game-type').value;
         db.ref('active_sessions/' + currentSessionId).once('value', snap => {
             const players = Object.keys(snap.val().players || {});
-            const budget = snap.val().budget;
-            
-            // Generate list hadiah
-            let list = [];
+            let list = [], budget = snap.val().budget;
             let jackpot = Math.round((budget * 0.4) / 1000) * 1000;
             let sisa = budget - jackpot;
             let base = Math.floor(sisa / (players.length > 1 ? players.length - 1 : 1));
@@ -161,29 +158,11 @@
                 status: 'playing',
                 gameType: type,
                 budgetList: list,
-                revealed: {},
-                history: []
+                showResults: (type === 'slot') // Slot langsung terbuka
             });
         });
     }
 
-    // --- PARTICIPANT ---
-    function joinSession() {
-        myName = document.getElementById('part-name').value.trim();
-        currentSessionId = document.getElementById('part-session-id').value.trim();
-        if(!myName || !currentSessionId) return alert("Isi Nama & Kode!");
-
-        db.ref('active_sessions/' + currentSessionId).once('value', snap => {
-            if(!snap.exists()) return alert("Sesi tidak ditemukan!");
-            db.ref('active_sessions/' + currentSessionId + '/players/' + myName).set(true).then(() => {
-                document.getElementById('display-my-name').innerText = myName;
-                goTo('screen-part-lobby');
-                listenSesi();
-            });
-        });
-    }
-
-    // --- SHARED SYNC ---
     function listenSesi() {
         db.ref('active_sessions/' + currentSessionId).on('value', snap => {
             const data = snap.val();
@@ -192,82 +171,124 @@
             const players = data.players ? Object.keys(data.players) : [];
             const html = players.map(p => `<li class="lobby-item">${p}</li>`).join('');
             document.getElementById(isHost ? 'host-player-list' : 'part-player-list').innerHTML = html;
-            if(isHost) document.getElementById('count-p').innerText = players.length;
 
             if(data.status === 'playing') {
                 goTo('screen-game');
-                renderGameMode(data);
+                renderGame(data, players);
             }
         });
     }
 
-    function renderGameMode(data) {
+    function renderGame(data, players) {
         const area = document.getElementById('game-area');
         const title = document.getElementById('game-title');
-        const desc = document.getElementById('game-desc');
+        title.innerText = data.gameType.toUpperCase();
         
-        if(data.gameType === 'angka') {
-            title.innerText = "🔢 TEBAK ANGKA";
-            desc.innerText = "Klik pada salah satu kotak untuk membuka hadiahmu!";
-            area.innerHTML = `<div class="grid-game"></div>`;
-            const grid = area.querySelector('.grid-game');
-            data.budgetList.forEach((val, i) => {
-                const winner = data.revealed ? data.revealed[i] : null;
-                const btn = document.createElement('div');
-                btn.className = `game-item ${winner ? 'revealed' : ''}`;
-                btn.innerText = winner ? `${winner}\nRp${val.toLocaleString()}` : i + 1;
-                btn.onclick = () => { if(!winner) claim(i, val); };
-                grid.appendChild(btn);
-            });
-        } 
-        else if(data.gameType === 'pancing') {
-            title.innerText = "🎣 PANCING AMPLOP";
-            desc.innerText = "Pilih amplop yang menurutmu berisi paling banyak!";
-            area.innerHTML = `<div class="grid-game"></div>`;
-            const grid = area.querySelector('.grid-game');
-            data.budgetList.forEach((val, i) => {
-                const winner = data.revealed ? data.revealed[i] : null;
-                const btn = document.createElement('div');
-                btn.className = `game-item ${winner ? 'revealed' : ''}`;
-                btn.innerHTML = winner ? `🧧<br>${winner}` : `🧧`;
-                btn.onclick = () => { if(!winner) claim(i, val); };
-                grid.appendChild(btn);
-            });
-        }
-        else if(data.gameType === 'slot') {
-            title.innerText = "🎰 SLOT THR";
-            desc.innerText = "Host yang akan memutar slot untukmu!";
-            area.innerHTML = `<div class="slot-box" id="slot-res">💰</div>`;
-            if(isHost) area.innerHTML += `<button class="btn-main" onclick="rollSlot()">PUTAR SLOT!</button>`;
+        if(isHost) {
+            document.getElementById('host-controls').style.display = (data.gameType === 'slot') ? 'none' : 'block';
+            area.innerHTML = `<p style="color:var(--primary)">Mode Monitor Host Aktif</p>`;
+        } else {
+            if(data.gameType === 'slot') {
+                renderSlot(data);
+            } else {
+                renderGrid(data);
+            }
         }
 
-        // Recap Table
+        // Table Recap
         const recap = document.getElementById('game-recap');
-        recap.innerHTML = "<tr><th>Nama</th><th>Hadiah</th></tr>";
-        if(data.history) {
-            Object.values(data.history).reverse().forEach(h => {
-                recap.innerHTML += `<tr><td>${h.name}</td><td style="color:var(--primary); font-weight:bold">Rp${h.win.toLocaleString()}</td></tr>`;
-            });
+        recap.innerHTML = "<tr><th>Nama</th><th>Hasil</th></tr>";
+        players.forEach(p => {
+            let win = "-";
+            if(data.selections) {
+                Object.keys(data.selections).forEach(k => {
+                    const sel = data.selections[k];
+                    if(sel.name === p) win = data.showResults ? `Rp${sel.val.toLocaleString()}` : "✅ Memilih";
+                });
+            }
+            recap.innerHTML += `<tr><td>${p}</td><td style="color:var(--primary); font-weight:bold">${win}</td></tr>`;
+        });
+    }
+
+    function renderGrid(data) {
+        const area = document.getElementById('game-area');
+        area.innerHTML = `<div class="grid-game"></div>`;
+        const grid = area.querySelector('.grid-game');
+        
+        data.budgetList.forEach((val, i) => {
+            const claimer = data.selections ? data.selections[i] : null;
+            const btn = document.createElement('div');
+            
+            let statusClass = "";
+            if (data.showResults && claimer) statusClass = "revealed";
+            else if (claimer && claimer.name === myName) statusClass = "selected-by-me";
+            else if (claimer) statusClass = "taken";
+            
+            btn.className = `game-item ${statusClass}`;
+            
+            if(data.showResults && claimer) {
+                btn.innerText = `Rp${val.toLocaleString()}`;
+            } else if(claimer) {
+                btn.innerText = (claimer.name === myName) ? "SAYA" : "OK";
+            } else {
+                btn.innerText = (data.gameType === 'angka') ? i + 1 : "🧧";
+            }
+
+            btn.onclick = () => { if(!hasSelected && !claimer && !data.showResults) pick(i, val); };
+            grid.appendChild(btn);
+        });
+    }
+
+    function renderSlot(data) {
+        const area = document.getElementById('game-area');
+        // Cek jika saya sudah spin
+        let myWin = null;
+        if(data.selections) {
+            Object.values(data.selections).forEach(s => { if(s.name === myName) myWin = s.val; });
+        }
+
+        if(myWin) {
+            area.innerHTML = `<div class="slot-machine"><div class="slot-window">💰 Rp${myWin.toLocaleString()}</div></div><p>Selamat! Kamu dapat THR.</p>`;
+        } else {
+            area.innerHTML = `
+                <div class="slot-machine">
+                    <div id="slot-box" class="slot-window">🎰</div>
+                </div>
+                <button class="btn-main" onclick="spinSlot()">PUTAR SLOT!</button>
+            `;
         }
     }
 
-    function claim(index, value) {
-        db.ref(`active_sessions/${currentSessionId}/revealed/${index}`).set(myName || "Host");
-        db.ref(`active_sessions/${currentSessionId}/history`).push({ name: myName || "Host", win: value });
-        confetti();
-        // Suara
-        const msg = new SpeechSynthesisUtterance(`${myName || "Peserta"} dapat ${value} rupiah`);
-        msg.lang = 'id-ID'; window.speechSynthesis.speak(msg);
+    function pick(index, value) {
+        hasSelected = true;
+        db.ref(`active_sessions/${currentSessionId}/selections/${index}`).set({ name: myName, val: value });
     }
 
-    function startScanner() {
-        const r = document.getElementById('reader');
-        r.style.display = 'block';
-        const scanner = new Html5Qrcode("reader");
-        scanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 200 }, (txt) => {
-            document.getElementById('part-session-id').value = txt;
-            scanner.stop(); r.style.display = 'none';
+    function spinSlot() {
+        const box = document.getElementById('slot-box');
+        box.classList.add('rolling');
+        
+        db.ref(`active_sessions/${currentSessionId}`).once('value', snap => {
+            const data = snap.val();
+            const players = Object.keys(data.players);
+            // Cari index hadiah yang belum diambil
+            let takenIdx = data.selections ? Object.keys(data.selections).map(Number) : [];
+            let availableIdx = data.budgetList.map((_, i) => i).filter(i => !takenIdx.includes(i));
+            
+            let myIdx = availableIdx[0]; // Ambil hadiah tersedia pertama
+            let myVal = data.budgetList[myIdx];
+
+            setTimeout(() => {
+                box.classList.remove('rolling');
+                db.ref(`active_sessions/${currentSessionId}/selections/${myIdx}`).set({ name: myName, val: myVal });
+                confetti();
+            }, 2000);
         });
+    }
+
+    function revealAll() {
+        db.ref(`active_sessions/${currentSessionId}/showResults`).set(true);
+        confetti();
     }
 </script>
 </body>
