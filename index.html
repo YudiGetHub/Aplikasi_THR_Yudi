@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi THR Keluarga Yudi v9.0</title>
+    <title>Aplikasi THR Keluarga Yudi v10.0</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -13,22 +13,27 @@
         @keyframes moveStars { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
         .container { max-width: 500px; margin: auto; padding: 20px; text-align: center; }
         .card { background: rgba(255, 255, 255, 0.95); border-radius: 25px; padding: 20px; color: #333; box-shadow: 0 15px 35px rgba(0,0,0,0.4); margin-top: 20px; animation: zoomIn 0.5s ease; border: 1px solid var(--gold); }
-        .menu-item { background: linear-gradient(135deg, var(--primary), #003300); color: var(--gold); padding: 20px; border-radius: 15px; cursor: pointer; margin-bottom: 15px; border: 2px solid var(--gold); font-weight: 600; transition: 0.3s; }
+        .menu-item { background: linear-gradient(135deg, var(--primary), #003300); color: var(--gold); padding: 18px; border-radius: 15px; cursor: pointer; margin-bottom: 15px; border: 2px solid var(--gold); font-weight: 600; transition: 0.3s; }
         
+        /* Game 1: Angka */
         .grid-angka { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .num-btn { background: #eee; height: 75px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.6em; font-weight: bold; cursor: pointer; border-bottom: 6px solid #ccc; }
-        .num-btn.revealed { background: var(--white); border: 2px solid var(--primary); font-size: 0.85em; color: var(--primary); transform: rotateY(360deg); transition: 0.8s; }
+        .num-btn { background: #eee; height: 70px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; font-weight: bold; cursor: pointer; border-bottom: 5px solid #ccc; }
+        .num-btn.revealed { background: var(--white); border: 2px solid var(--primary); font-size: 0.8em; color: var(--primary); transform: rotateY(360deg); transition: 0.8s; }
 
-        .slot-container { background: #111; padding: 25px; border-radius: 20px; border: 4px solid var(--gold); margin: 20px 0; height: 110px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 30px #000; }
-        #slot-val { color: var(--gold); font-size: 2.1em; font-weight: 800; text-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
-        
+        /* Game 2: Bar */
+        .slot-container { background: #111; padding: 20px; border-radius: 15px; border: 4px solid var(--gold); margin: 15px 0; height: 90px; display: flex; align-items: center; justify-content: center; }
+        #slot-val { color: var(--gold); font-size: 1.8em; font-weight: 800; }
+
+        /* Game 3: Pancing Amplop (Fishing) */
+        .fishing-area { position: relative; width: 100%; height: 300px; background: #e3f2fd; border-radius: 15px; overflow: hidden; border: 2px dashed var(--primary); margin: 15px 0; }
+        .envelope { position: absolute; font-size: 2.5em; cursor: pointer; transition: all 0.5s linear; user-select: none; }
+
         input { width: 100%; padding: 12px; margin: 8px 0; border: 2px solid #ddd; border-radius: 12px; box-sizing: border-box; }
-        .btn-main { background: var(--primary); color: white; border: none; padding: 16px; width: 100%; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1.1em; box-shadow: 0 5px #003300; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 1.1em; box-shadow: 0 5px #003300; }
         .back-btn { background: #757575; color: white; border: none; padding: 6px 15px; border-radius: 8px; float: left; cursor: pointer; margin-bottom: 10px; }
-        
-        .recap-container { margin-top: 25px; max-height: 250px; overflow-y: auto; text-align: left; font-size: 0.85em; background: #fff; border-radius: 15px; padding: 12px; }
+        .recap-container { margin-top: 20px; max-height: 200px; overflow-y: auto; background: #fff; border-radius: 15px; padding: 10px; border: 1px solid #ddd; font-size: 0.85em; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { border-bottom: 1px solid #f0f0f0; padding: 12px; text-align: center; }
+        th, td { border-bottom: 1px solid #f0f0f0; padding: 10px; text-align: center; }
         @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
@@ -39,39 +44,41 @@
     <h1 style="color:var(--gold); margin-top:30px; text-shadow: 2px 2px #000;">🌙 EID MUBARAK 🌙</h1>
 
     <div id="dashboard" class="card">
-        <h2 style="margin-bottom: 20px; color: var(--primary);">Main Game THR</h2>
-        <div class="menu-item" onclick="openSetup('angka')">🔢 Tebak Angka Keberuntungan</div>
-        <div class="menu-item" onclick="openSetup('bar')">🎰 Slot Bar (Secret Shuffle)</div>
-        <p style="font-size: 0.7em; color: #888;">Eksklusif: Fitur Suara Web Speech ✅</p>
+        <h2 style="color: var(--primary);">Pilih Game THR</h2>
+        <div class="menu-item" onclick="openSetup('angka')">🔢 Tebak Angka</div>
+        <div class="menu-item" onclick="openSetup('bar')">🎰 Slot Bar (Shuffle)</div>
+        <div class="menu-item" onclick="openSetup('pancing')">🎣 Pancing Amplop</div>
+        <p style="font-size: 0.7em; color: #888;">Audio & Animasi Aktif ✅</p>
     </div>
 
     <div id="setup" class="card" style="display:none;">
-        <button class="back-btn" onclick="showDashboard()">← Kembali</button><br>
-        <h2 style="color: var(--primary);">Pengaturan Dana</h2>
+        <button class="back-btn" onclick="showDashboard()">← Menu</button><br>
+        <h2 style="color: var(--primary);">Pengaturan</h2>
         <input type="number" id="inp-peserta" placeholder="Jumlah Peserta" value="5">
         <input type="number" id="inp-budget" placeholder="Total Budget (Rp)" value="1000000">
-        <button class="btn-main" onclick="initGame()">SIAPKAN HADIAH 🚀</button>
+        <button class="btn-main" onclick="initGame()">MULAI GAME 🚀</button>
     </div>
 
     <div id="game-angka" class="card" style="display:none;">
-        <h3>Pilih Angka Keberuntungan!</h3>
+        <h3>Pilih Angka!</h3>
         <div class="grid-angka" id="angka-area"></div>
-        <div class="recap-container">
-            <table><thead><tr><th>No</th><th>Nominal THR</th></tr></thead><tbody id="recap-angka-body"></tbody></table>
-        </div>
+        <div class="recap-container"><table><thead><tr><th>No</th><th>Hasil</th></tr></thead><tbody id="recap-angka-body"></tbody></table></div>
         <button class="btn-main" onclick="showDashboard()" style="background:#757575;">Tutup</button>
     </div>
 
     <div id="game-bar" class="card" style="display:none;">
         <h3 id="info-bar">Giliran Peserta ke-1</h3>
-        <div class="slot-container">
-            <div id="slot-val">SIAP?</div>
-        </div>
-        <button class="btn-main" id="btn-slot" onclick="handleSlot()">ACAK SEKARANG 🎰</button>
-        <div class="recap-container">
-            <table id="recap-bar-table"><thead><tr><th>Penerima</th><th>Hasil THR</th></tr></thead><tbody id="recap-bar-body"></tbody></table>
-        </div>
-        <button class="btn-main" onclick="showDashboard()" style="background:#757575; margin-top:15px;">Tutup</button>
+        <div class="slot-container"><div id="slot-val">READY?</div></div>
+        <button class="btn-main" id="btn-slot" onclick="handleSlot()">ACAK 🎰</button>
+        <div class="recap-container"><table><thead><tr><th>Penerima</th><th>Hasil</th></tr></thead><tbody id="recap-bar-body"></tbody></table></div>
+        <button class="btn-main" onclick="showDashboard()" style="background:#757575; margin-top:10px;">Tutup</button>
+    </div>
+
+    <div id="game-pancing" class="card" style="display:none;">
+        <h3 id="info-pancing">Klik amplop untuk menangkap!</h3>
+        <div class="fishing-area" id="fishing-area"></div>
+        <div class="recap-container"><table><thead><tr><th>Penerima</th><th>Hasil</th></tr></thead><tbody id="recap-pancing-body"></tbody></table></div>
+        <button class="btn-main" onclick="showDashboard()" style="background:#757575; margin-top:10px;">Tutup</button>
     </div>
 </div>
 
@@ -84,6 +91,7 @@
     let currentParticipant = 1;
     let isRunning = false;
     let slotInterval;
+    let fishingInterval;
 
     function format(v) { return "Rp" + new Intl.NumberFormat('id-ID').format(v); }
     function showDashboard() { location.reload(); }
@@ -94,18 +102,12 @@
         document.getElementById('setup').style.display = 'block';
     }
 
-    // FUNGSI SUARA WEB SPEECH API (Native Browser)
     function bicara(teks) {
         if ('speechSynthesis' in window) {
-            // Batalkan suara sebelumnya agar tidak tumpang tindih
             window.speechSynthesis.cancel();
-            
-            const msg = new SpeechSynthesisUtterance();
-            msg.text = teks;
+            const msg = new SpeechSynthesisUtterance(teks);
             msg.lang = 'id-ID';
-            msg.rate = 0.85; // Kecepatan agak lambat supaya jelas
-            msg.pitch = 1.1; // Nada ceria
-            
+            msg.rate = 0.85;
             window.speechSynthesis.speak(msg);
         }
     }
@@ -115,13 +117,13 @@
         let budget = parseInt(document.getElementById('inp-budget').value);
         if(!jml || !budget) return alert("Isi data!");
 
-        let jackpot = Math.round((budget * 0.35) / 1000) * 1000;
+        let jackpot = Math.round((budget * 0.3) / 1000) * 1000;
         let sisa = budget - jackpot;
         let base = Math.floor(sisa / (jml - 1));
         
         budgetList = [jackpot];
         for(let i=0; i < jml - 1; i++){
-            let val = Math.round((base * (0.6 + Math.random() * 0.8)) / 1000) * 1000;
+            let val = Math.round((base * (0.7 + Math.random() * 0.6)) / 1000) * 1000;
             if(val > sisa) val = base;
             budgetList.push(val);
             sisa -= val;
@@ -131,80 +133,85 @@
         fullOriginalList = [...budgetList];
 
         document.getElementById('setup').style.display = 'none';
-        if(mode === 'angka') setupAngka(); else setupBar();
+        if(mode === 'angka') setupAngka(); 
+        else if(mode === 'bar') setupBar();
+        else setupPancing();
     }
 
+    // --- LOGIC GAME 1: ANGKA ---
     function setupAngka() {
         document.getElementById('game-angka').style.display = 'block';
         const area = document.getElementById('angka-area');
-        area.innerHTML = "";
         budgetList.forEach((val, i) => {
             area.innerHTML += `<div class="num-btn" id="nb-${i}" onclick="revealAngka(${i}, ${val})">${i+1}</div>`;
         });
     }
-
     function revealAngka(i, val) {
         const el = document.getElementById('nb-' + i);
         if(el.classList.contains('revealed')) return;
-        el.classList.add('revealed');
-        el.innerText = format(val);
-        
-        bicara(`Selamat. Anda berhak menerima T H R sebesar ${val} rupiah.`);
-        
-        if(val === Math.max(...fullOriginalList)) { 
-            confetti(); 
-            document.getElementById('snd-win').play(); 
-        }
+        el.classList.add('revealed'); el.innerText = format(val);
+        bicara(`Selamat. Anda mendapatkan ${val} rupiah.`);
+        if(val === Math.max(...fullOriginalList)) { confetti(); document.getElementById('snd-win').play(); }
         document.getElementById('recap-angka-body').innerHTML += `<tr><td>${i+1}</td><td>${format(val)}</td></tr>`;
     }
 
-    function setupBar() {
-        document.getElementById('game-bar').style.display = 'block';
-    }
-
+    // --- LOGIC GAME 2: BAR ---
+    function setupBar() { document.getElementById('game-bar').style.display = 'block'; }
     function handleSlot() {
         const btn = document.getElementById('btn-slot');
         const display = document.getElementById('slot-val');
-
         if (!isRunning) {
-            isRunning = true;
-            btn.innerText = "BERHENTI! ✋";
-            btn.style.background = "#d32f2f";
+            isRunning = true; btn.innerText = "STOP!";
             slotInterval = setInterval(() => {
-                let visualTemp = fullOriginalList[Math.floor(Math.random() * fullOriginalList.length)];
-                display.innerText = format(visualTemp);
+                display.innerText = format(fullOriginalList[Math.floor(Math.random() * fullOriginalList.length)]);
             }, 60);
         } else {
-            isRunning = false;
-            clearInterval(slotInterval);
-            btn.disabled = true;
-
+            isRunning = false; clearInterval(slotInterval);
             let winIdx = Math.floor(Math.random() * budgetList.length);
             let winVal = budgetList[winIdx];
             display.innerText = format(winVal);
-
-            bicara(`Luar biasa. Peserta ke ${currentParticipant} mendapatkan T H R senilai ${winVal} rupiah.`);
-
-            document.getElementById('snd-win').play();
-            confetti({particleCount: 120, spread: 80});
-
+            bicara(`Peserta ${currentParticipant} mendapatkan ${winVal} rupiah.`);
+            document.getElementById('snd-win').play(); confetti();
             document.getElementById('recap-bar-body').innerHTML += `<tr><td>Peserta ${currentParticipant}</td><td>${format(winVal)}</td></tr>`;
-            budgetList.splice(winIdx, 1);
-            currentParticipant++;
-
-            setTimeout(() => {
-                if (budgetList.length > 0) {
-                    btn.disabled = false;
-                    btn.innerText = "LANJUTKAN 🎰";
-                    btn.style.background = "var(--primary)";
-                    document.getElementById('info-bar').innerText = `Giliran Peserta ke-${currentParticipant}`;
-                } else {
-                    btn.style.display = 'none';
-                    document.getElementById('info-bar').innerText = "SELESAI!";
-                    display.innerText = "LUNAS 🏁";
-                }
-            }, 2500);
+            budgetList.splice(winIdx, 1); currentParticipant++;
+            btn.disabled = true;
+            setTimeout(() => { 
+                if(budgetList.length > 0) { btn.disabled = false; btn.innerText = "LANJUT"; }
+                else { btn.innerText = "HABIS"; }
+            }, 2000);
         }
+    }
+
+    // --- LOGIC GAME 3: PANCING ---
+    function setupPancing() {
+        document.getElementById('game-pancing').style.display = 'block';
+        const area = document.getElementById('fishing-area');
+        for(let i=0; i<budgetList.length; i++) {
+            const env = document.createElement('div');
+            env.className = 'envelope'; env.innerHTML = '✉️';
+            env.style.left = Math.random() * 80 + '%';
+            env.style.top = Math.random() * 80 + '%';
+            env.onclick = () => catchEnvelope(env);
+            area.appendChild(env);
+        }
+        fishingInterval = setInterval(() => {
+            document.querySelectorAll('.envelope').forEach(en => {
+                en.style.left = Math.random() * 80 + '%';
+                en.style.top = Math.random() * 80 + '%';
+            });
+        }, 800);
+    }
+    function catchEnvelope(el) {
+        if(budgetList.length === 0) return;
+        let winIdx = Math.floor(Math.random() * budgetList.length);
+        let winVal = budgetList[winIdx];
+        el.innerHTML = '💰'; el.style.pointerEvents = 'none';
+        bicara(`Keren! Anda memancing hadiah sebesar ${winVal} rupiah.`);
+        document.getElementById('snd-win').play(); confetti();
+        document.getElementById('recap-pancing-body').innerHTML += `<tr><td>Pancingan ${currentParticipant}</td><td>${format(winVal)}</td></tr>`;
+        budgetList.splice(winIdx, 1); currentParticipant++;
+        setTimeout(() => el.remove(), 1000);
+        if(budgetList.length === 0) clearInterval(fishingInterval);
     }
 </script>
 </body>
