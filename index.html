@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>THR Yudi v31.0 - Full Flow Fix</title>
+    <title>THR Yudi v33.0 - Layout Fix</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
@@ -11,47 +11,39 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #0a3d0d; --gold: #d4af37; --dark: #051a06; --glass: rgba(255, 255, 255, 0.98); }
-        body { font-family: 'Poppins', sans-serif; background: var(--dark); color: #fff; margin: 0; padding: 0; overflow-x: hidden; }
+        :root { --primary: #0a3d0d; --gold: #d4af37; --dark: #051a06; --white: #ffffff; }
+        body { font-family: 'Poppins', sans-serif; background: var(--dark); color: #fff; margin: 0; padding: 0; }
         .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #113311 0%, #051a06 100%); z-index: -1; }
-        .container { max-width: 450px; margin: auto; padding: 15px; min-height: 100vh; }
+        .container { max-width: 450px; margin: auto; padding: 10px; display: flex; flex-direction: column; min-height: 100vh; }
         
-        .card { background: var(--glass); border-radius: 20px; padding: 20px; color: #111; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid var(--gold); margin-bottom: 15px; text-align: center; }
-        h1 { color: var(--gold); font-weight: 800; margin: 0 0 10px 0; font-size: 1.6em; }
-
-        .btn { border: none; padding: 14px; border-radius: 12px; font-weight: 800; cursor: pointer; width: 100%; font-family: inherit; margin-top: 8px; text-transform: uppercase; }
+        /* Card Styles */
+        .card { background: rgba(255,255,255,0.95); border-radius: 15px; padding: 15px; color: #111; border: 2px solid var(--gold); margin-bottom: 10px; text-align: center; }
+        
+        /* Buttons */
+        .btn { border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; width: 100%; margin-top: 8px; text-transform: uppercase; }
+        .btn-gold { background: var(--gold); color: white; box-shadow: 0 4px 0 #b8860b; }
+        .btn-danger { background: #d32f2f; color: white; box-shadow: 0 4px 0 #9a1f1f; }
         .btn-primary { background: var(--primary); color: var(--gold); }
-        .btn-gold { background: var(--gold); color: white; }
-        .btn-danger { background: #d32f2f; color: white; }
 
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 10px; text-align: center; }
+        input, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; text-align: center; font-family: inherit; }
 
-        .qr-area { display: flex; flex-direction: column; align-items: center; margin: 15px 0; }
-        #qr-code { background: white; padding: 10px; border-radius: 10px; border: 4px solid var(--gold); }
-
-        /* Game Area */
-        #game-box { position: relative; width: 100%; height: 350px; background: rgba(0,0,0,0.4); border-radius: 15px; overflow: hidden; border: 1px solid var(--gold); margin-bottom: 15px; }
+        /* Game Box */
+        #game-box { position: relative; width: 100%; height: 300px; background: rgba(0,0,0,0.5); border-radius: 15px; overflow: hidden; border: 2px solid var(--gold); margin-bottom: 10px; }
         
-        /* Angpao */
-        .angpao { position: absolute; width: 50px; height: 70px; background: #e63946; border: 2px solid var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; animation: fall linear infinite; z-index: 5; cursor: pointer; }
+        /* Host Table Section - ALWAYS WHITE */
+        .admin-panel { background: var(--white); border-radius: 15px; padding: 15px; color: #333; margin-top: 10px; border: 3px solid var(--gold); }
+        .recap-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
+        .recap-table th { background: #f0f0f0; padding: 8px; text-align: left; border-bottom: 2px solid #ddd; }
+        .recap-table td { padding: 8px; border-bottom: 1px solid #eee; }
+
+        /* Game Elements */
+        .angpao { position: absolute; width: 45px; height: 65px; background: #e63946; border: 2px solid var(--gold); border-radius: 5px; animation: fall linear infinite; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2em; }
         .angpao::after { content: '🧧'; }
-        @keyframes fall { 0% { transform: translateY(-100px) rotate(0deg); } 100% { transform: translateY(450px) rotate(360deg); } }
-
-        /* Grid */
-        .grid-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; }
-        .cell { background: #fff; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #ddd; color: #333; }
-        .cell.my-pick { background: var(--gold) !important; color: white; }
-        .cell.taken { background: #eee; color: #aaa; }
-
-        /* Host Recap */
-        #host-only-panel { display: none; margin-top: 20px; }
-        .recap-table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; font-size: 0.85em; color: #333; text-align: left; }
-        .recap-table th { background: #eee; padding: 10px; }
-        .recap-table td { padding: 10px; border-bottom: 1px solid #f0f0f0; }
-
-        /* Loader */
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--gold); border-radius: 50%; width: 40px; height: 40px; animation: spin 2s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fall { 0% { transform: translateY(-80px); } 100% { transform: translateY(320px); } }
+        
+        .grid-game { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
+        .cell { background: #fff; height: 55px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #ddd; color: #333; }
+        .cell.mine { background: var(--gold) !important; color: white; }
     </style>
 </head>
 <body>
@@ -60,71 +52,64 @@
 <div class="container">
     
     <div id="screen-start" class="card">
-        <h1>THR DIGITAL</h1>
-        <button class="btn btn-primary" onclick="goTo('screen-host-setup')">HOST PANEL (YUDI)</button>
-        <button class="btn btn-gold" onclick="goTo('screen-part-join')">JOIN PESERTA</button>
+        <h1 style="color:var(--primary); margin:0;">THR YUDI</h1>
+        <button class="btn btn-primary" onclick="goTo('screen-host-setup')">ADMIN MODE</button>
+        <button class="btn btn-gold" onclick="goTo('screen-part-join')">PESERTA MASUK</button>
     </div>
 
     <div id="screen-host-setup" class="card" style="display:none;">
-        <h3>Set Budget</h3>
-        <input type="password" id="h-pass" placeholder="Admin Password">
+        <input type="password" id="h-pass" placeholder="Password Admin">
         <input type="number" id="h-budget" value="1000000">
-        <button class="btn btn-primary" onclick="initHost()">BUAT ROOM</button>
-        <button class="btn" onclick="goTo('screen-start')">BATAL</button>
+        <button class="btn btn-primary" onclick="initHost()">GAS ROOM</button>
     </div>
 
     <div id="screen-host-lobby" class="card" style="display:none;">
-        <div class="qr-area">
-            <div id="qr-code"></div>
-            <h2 style="margin:10px 0;">KODE: <span id="room-id">----</span></h2>
-        </div>
+        <div id="qr-code" style="display:inline-block; background:white; padding:10px; border-radius:10px;"></div>
+        <h2 style="margin:10px 0;">KODE: <span id="room-id">----</span></h2>
         <select id="g-type">
             <option value="angka">🔢 Tebak Angka</option>
-            <option value="pancing">🧧 Rebutan Angpao Terbang</option>
-            <option value="slot">🎰 Slot Keberuntungan</option>
+            <option value="pancing">🧧 Angpao Terbang</option>
+            <option value="slot">🎰 Slot Untung</option>
         </select>
-        <div id="player-count" style="font-weight: bold; margin:10px 0;">0 Peserta Tergabung</div>
-        <button class="btn btn-primary" onclick="startGame()">MULAI SEKARANG 🏁</button>
+        <p id="player-count">0 Peserta</p>
+        <button class="btn btn-primary" onclick="startGame()">START GAME</button>
     </div>
 
     <div id="screen-part-join" class="card" style="display:none;">
-        <h3>Masuk Room</h3>
-        <input type="text" id="p-name" placeholder="Nama Kamu">
-        <input type="text" id="p-id" placeholder="Kode 4 Digit">
+        <input type="text" id="p-name" placeholder="Nama Lengkap">
+        <input type="text" id="p-id" placeholder="Kode Room">
         <button class="btn btn-primary" onclick="initPart()">GABUNG</button>
         <div id="reader" style="width:100%; margin-top:10px;"></div>
-        <button class="btn btn-gold" onclick="startScan()">SCAN BARCODE</button>
-        <button class="btn" onclick="goTo('screen-start')">KEMBALI</button>
+        <button class="btn btn-gold" onclick="startScan()">SCAN QR</button>
     </div>
 
     <div id="screen-part-lobby" class="card" style="display:none;">
-        <h2 style="color:var(--primary)">SABAR YA!</h2>
-        <div class="loader"></div>
-        <p>Sudah terhubung sebagai: <b id="wait-name" style="color:var(--gold)">-</b></p>
-        <p>Lagi nunggu Yudi buat mulai gamenya...</p>
+        <h2 style="color:var(--primary)">SABAR...</h2>
+        <p>Lagi nunggu Yudi start gamenya.</p>
+        <p id="wait-name" style="font-weight:bold; color:var(--gold);"></p>
     </div>
 
     <div id="screen-game" style="display:none;">
-        <div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center;">
-            <b id="game-label" style="color:var(--primary)">GAME</b>
-            <span id="user-label" style="background:#ddd; padding:2px 8px; border-radius:5px; color:#000; font-size:0.8em;"></span>
+        <div class="card" style="padding:10px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <b id="game-label">GAME</b>
+            <span id="user-label" style="background:#eee; padding:2px 8px; border-radius:5px; color:#000; font-size:0.8em;"></span>
         </div>
 
         <div id="game-box"></div>
 
-        <div id="host-only-panel">
+        <div id="host-controls" style="display:none;">
             <button class="btn btn-gold" onclick="revealAll()">🎁 BUKA HASIL SEMUA</button>
-            <button class="btn btn-danger" onclick="resetGame()">GANTI GAME / BALIK LOBBY</button>
-            <div class="card" style="margin-top:15px; padding:10px; text-align:left;">
-                <h4 style="margin:0 0 10px 0;">Tabel Pemenang (Real-time):</h4>
+            <button class="btn btn-danger" onclick="resetGame()">RESET / BALIK LOBBY</button>
+            
+            <div class="admin-panel">
+                <h4 style="margin:0; border-bottom:1px solid #ddd;">TABEL REKAP</h4>
                 <table class="recap-table">
-                    <thead><tr><th>Nama</th><th>Hasil</th></tr></thead>
+                    <thead><tr><th>Nama</th><th>THR</th></tr></thead>
                     <tbody id="recap-body"></tbody>
                 </table>
             </div>
         </div>
     </div>
-
 </div>
 
 <script>
@@ -148,13 +133,13 @@
     }
 
     function initHost() {
-        if(document.getElementById('h-pass').value !== "yudi123") return alert("Salah Password!");
+        if(document.getElementById('h-pass').value !== "yudi123") return alert("Akses Ditolak!");
         isHost = true;
         myRoomId = Math.floor(1000 + Math.random() * 9000).toString();
         db.ref('active_sessions/' + myRoomId).set({ status: 'lobby', budget: parseInt(document.getElementById('h-budget').value), showResults: false });
         document.getElementById('room-id').innerText = myRoomId;
         document.getElementById('qr-code').innerHTML = "";
-        new QRCode(document.getElementById('qr-code'), { text: myRoomId, width: 150, height: 150 });
+        new QRCode(document.getElementById('qr-code'), { text: myRoomId, width: 130, height: 130 });
         goTo('screen-host-lobby');
         sync();
     }
@@ -166,7 +151,7 @@
         db.ref(`active_sessions/${myRoomId}/players/${myName}`).set(true);
         document.getElementById('user-label').innerText = myName;
         document.getElementById('wait-name').innerText = myName;
-        goTo('screen-part-lobby'); // Masuk layar tunggu
+        goTo('screen-part-lobby');
         sync();
     }
 
@@ -174,11 +159,11 @@
         db.ref('active_sessions/' + myRoomId).on('value', snap => {
             room = snap.val();
             if(!room) return;
-            if(isHost) document.getElementById('player-count').innerText = Object.keys(room.players || {}).length + " Peserta Tergabung";
+            if(isHost) document.getElementById('player-count').innerText = Object.keys(room.players || {}).length + " Peserta";
             
             if(room.status === 'playing') {
                 goTo('screen-game');
-                document.getElementById('host-only-panel').style.display = isHost ? 'block' : 'none';
+                document.getElementById('host-controls').style.display = isHost ? 'block' : 'none';
                 render();
             } else if(room.status === 'lobby') {
                 if(isHost) goTo('screen-host-lobby');
@@ -191,7 +176,6 @@
         const type = document.getElementById('g-type').value;
         db.ref('active_sessions/' + myRoomId).once('value', snap => {
             const ps = Object.keys(snap.val().players || {});
-            if(ps.length === 0) return alert("Belum ada peserta!");
             let budget = snap.val().budget, list = [], current = 0;
             for(let i=0; i<ps.length; i++) {
                 if(i === ps.length - 1) list.push(budget - current);
@@ -210,7 +194,7 @@
         box.innerHTML = "";
         document.getElementById('game-label').innerText = room.gameType.toUpperCase();
         if(isHost) {
-            box.innerHTML = "<p style='text-align:center; padding-top:140px; color:#aaa;'>MONITORING ACTIVE<br>Lihat Tabel di Bawah</p>";
+            box.innerHTML = "<p style='text-align:center; padding-top:120px; color:#aaa;'>ADMIN MONITOR</p>";
             updateRecap();
         } else {
             if(room.gameType === 'pancing') renderPancing();
@@ -224,33 +208,30 @@
         let myD = null;
         if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === myName) myD = s; });
         if(myD) {
-            box.innerHTML = `<div style="text-align:center; padding-top:100px;"><h2>🧧 TERTANGKAP!</h2>
-            ${room.showResults ? `<h1>Rp${myD.val.toLocaleString()}</h1>` : '<p>Tunggu dibuka Yudi...</p>'}</div>`;
+            box.innerHTML = `<div style="text-align:center; padding-top:80px;"><h2>🧧 DAPET!</h2>
+            ${room.showResults ? `<h1>Rp${myD.val.toLocaleString()}</h1>` : '<p>Sabar, nunggu Yudi...</p>'}</div>`;
             if(room.showResults) handleVoice(myD.val);
             return;
         }
         room.budgetList.forEach((val, i) => {
             if(!room.selections || !room.selections[i]) {
-                const el = document.createElement('div');
-                el.className = "angpao";
-                el.style.left = Math.random() * 80 + "%";
-                el.style.animationDuration = (2 + Math.random() * 2) + "s";
-                el.onclick = () => pick(i, val);
-                box.appendChild(el);
+                const el = document.createElement('div'); el.className = "angpao";
+                el.style.left = Math.random() * 80 + "%"; el.style.animationDuration = (2 + Math.random() * 2) + "s";
+                el.onclick = () => pick(i, val); box.appendChild(el);
             }
         });
     }
 
     function renderAngka() {
         const box = document.getElementById('game-box');
-        box.innerHTML = "<div class='grid-layout'></div>";
-        const grid = box.querySelector('.grid-layout');
+        box.innerHTML = "<div class='grid-game'></div>";
+        const grid = box.querySelector('.grid-game');
         room.budgetList.forEach((val, i) => {
             const sel = room.selections ? room.selections[i] : null;
             const el = document.createElement('div');
-            el.className = `cell ${sel ? (sel.name === myName ? 'my-pick' : 'taken') : ''}`;
+            el.className = `cell ${sel ? (sel.name === myName ? 'mine' : 'taken') : ''}`;
             if(room.showResults && sel && sel.name === myName) { el.innerText = `Rp${val.toLocaleString()}`; handleVoice(val); }
-            else { el.innerText = sel ? (sel.name === myName ? "SAYA" : "X") : i+1; }
+            else { el.innerText = sel ? (sel.name === myName ? "OK" : "X") : i+1; }
             el.onclick = () => { if(!hasPicked && !sel) pick(i, val); };
             grid.appendChild(el);
         });
@@ -260,12 +241,8 @@
         const box = document.getElementById('game-box');
         let myW = null;
         if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === myName) myW = s.val; });
-        if(myW) {
-            box.innerHTML = `<div style="text-align:center; padding-top:100px;"><h1>🎰 Rp${myW.toLocaleString()}</h1></div>`;
-            handleVoice(myW);
-        } else {
-            box.innerHTML = `<div style="padding:20px;"><button class="btn btn-gold" onclick="spin()">SPIN SLOT 🎰</button></div>`;
-        }
+        if(myW) { box.innerHTML = `<div style="text-align:center; padding-top:100px;"><h1>🎰 Rp${myW.toLocaleString()}</h1></div>`; handleVoice(myW); }
+        else { box.innerHTML = `<div style="padding:20px;"><button class="btn btn-gold" onclick="spin()">PUTAR SLOT 🎰</button></div>`; }
     }
 
     function pick(i, v) {
@@ -284,8 +261,8 @@
         const body = document.getElementById('recap-body');
         body.innerHTML = "";
         Object.keys(room.players || {}).forEach(p => {
-            let res = "---";
-            if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === p) res = room.showResults ? `<b>Rp${s.val.toLocaleString()}</b>` : '✅ OK'; });
+            let res = "⏳";
+            if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === p) res = room.showResults ? `<b>Rp${s.val.toLocaleString()}</b>` : '✅'; });
             body.innerHTML += `<tr><td>${p}</td><td>${res}</td></tr>`;
         });
     }
@@ -296,8 +273,7 @@
     }
 
     function handleVoice(amt) {
-        if(spoken) return;
-        spoken = true;
+        if(spoken) return; spoken = true;
         const msg = new SpeechSynthesisUtterance(`Selamat ${myName}, dapet ${amt} rupiah!`);
         msg.lang = 'id-ID'; window.speechSynthesis.speak(msg);
     }
