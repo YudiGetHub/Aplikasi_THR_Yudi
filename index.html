@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>THR Yudi v39.0 - Fair Mode</title>
+    <title>THR Yudi v43.0 - The Bomb Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
@@ -11,34 +11,44 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #0a3d0d; --gold: #d4af37; --dark: #051a06; --white: #ffffff; }
-        body { font-family: 'Poppins', sans-serif; background: var(--dark); color: #fff; margin: 0; padding: 0; }
+        :root { --primary: #0a3d0d; --gold: #d4af37; --dark: #051a06; --white: #ffffff; --red: #ff4d4d; }
+        body { font-family: 'Poppins', sans-serif; background: var(--dark); color: #fff; margin: 0; padding: 0; overflow-x: hidden; }
         .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #113311 0%, #051a06 100%); z-index: -1; }
         .container { max-width: 450px; margin: auto; padding: 10px; display: flex; flex-direction: column; min-height: 100vh; }
-        .card { background: rgba(255,255,255,0.95); border-radius: 15px; padding: 15px; color: #111; border: 2px solid var(--gold); margin-bottom: 10px; text-align: center; }
-        .btn { border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; width: 100%; margin-top: 8px; text-transform: uppercase; }
+        .card { background: rgba(255,255,255,0.95); border-radius: 15px; padding: 15px; color: #111; border: 2px solid var(--gold); margin-bottom: 10px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .btn { border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; width: 100%; margin-top: 8px; text-transform: uppercase; transition: 0.2s; }
         .btn-gold { background: var(--gold); color: white; box-shadow: 0 4px 0 #b8860b; }
         .btn-danger { background: #d32f2f; color: white; box-shadow: 0 4px 0 #9a1f1f; }
         .btn-primary { background: var(--primary); color: var(--gold); }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 10px; text-align: center; font-family: inherit; box-sizing: border-box; display: block; }
-        #game-box { position: relative; width: 100%; height: 320px; background: rgba(0,0,0,0.5); border-radius: 15px; overflow: hidden; border: 2px solid var(--gold); margin-bottom: 10px; }
-        .slot-display { font-size: 3em; font-weight: 800; color: var(--gold); text-shadow: 0 0 10px rgba(212,175,55,0.5); margin-top: 70px; }
+        
+        #game-box { position: relative; width: 100%; height: 400px; background: rgba(0,0,0,0.6); border-radius: 15px; overflow: hidden; border: 2px solid var(--gold); margin-bottom: 10px; }
+        
+        /* Bomb Game Styles */
+        .wire-container { display: flex; flex-direction: column; gap: 15px; padding: 20px; align-items: center; }
+        .wire { width: 80%; height: 15px; border-radius: 10px; cursor: pointer; position: relative; border: 2px solid #333; transition: 0.3s; }
+        .wire::after { content: ''; position: absolute; right: -10px; top: -5px; width: 10px; height: 25px; background: #555; border-radius: 3px; }
+        .wire.cut { opacity: 0.3; transform: translateX(10px); cursor: default; }
+
+        /* General Quiz & UI */
+        .quiz-q { font-size: 1.1em; font-weight: 800; color: #fff; padding: 15px; background: var(--primary); border-radius: 10px; margin: 10px; min-height: 60px; display: flex; align-items: center; justify-content: center; }
+        .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+        .opt-btn { background: white; color: #111; border: 2px solid var(--gold); padding: 15px 5px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85em; }
+        .timer-bar { width: 100%; height: 6px; background: #444; position: absolute; top: 0; left: 0; }
+        #timer-inner { width: 100%; height: 100%; background: var(--gold); transition: 1s linear; }
+
         .angpao { position: absolute; width: 45px; height: 65px; background: #e63946; border: 2px solid var(--gold); border-radius: 5px; animation: fall linear infinite; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2em; }
-        .angpao::after { content: '🧧'; }
-        @keyframes fall { 0% { transform: translateY(-80px); } 100% { transform: translateY(320px); } }
-        .light-indicator { width: 100%; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; font-weight: 800; transition: 0.3s; }
-        .light-red { background: #ff4d4d; color: #fff; }
+        @keyframes fall { 0% { transform: translateY(-80px); } 100% { transform: translateY(420px); } }
+        
+        .light-indicator { width: 100%; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 1.3em; font-weight: 800; }
+        .light-red { background: var(--red); color: #fff; }
         .light-green { background: #47d147; color: #fff; }
-        .walk-btn { width: 120px; height: 120px; border-radius: 50%; background: var(--gold); color: white; font-size: 1.2em; font-weight: 800; border: 5px solid white; margin: 20px auto; cursor: pointer; box-shadow: 0 6px 0 #b8860b; }
-        .walk-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #b8860b; }
-        .progress-bar { width: 80%; height: 20px; background: #eee; border-radius: 10px; margin: 10px auto; overflow: hidden; border: 1px solid #ccc; }
-        #progress-inner { width: 0%; height: 100%; background: var(--primary); transition: 0.2s; }
+        
         .admin-panel { background: var(--white); border-radius: 15px; padding: 15px; color: #333; margin-top: 10px; border: 3px solid var(--gold); }
-        .recap-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
-        .recap-table th { background: #f0f0f0; padding: 8px; text-align: left; border-bottom: 2px solid #ddd; }
-        .recap-table td { padding: 8px; border-bottom: 1px solid #eee; }
+        .recap-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8em; }
+        .recap-table th { background: #f0f0f0; padding: 6px; text-align: left; }
         .grid-game { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
-        .cell { background: #fff; height: 55px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #ddd; color: #333; }
+        .cell { background: #fff; height: 60px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #ddd; color: #333; }
         .cell.mine { background: var(--gold) !important; color: white; }
     </style>
 </head>
@@ -48,6 +58,7 @@
 <div class="container">
     <div id="screen-start" class="card">
         <h1 style="color:var(--primary); margin:0;">THR YUDI</h1>
+        <p style="font-size: 0.8em; color: #666; margin-top: 0;">v43.0 - The Bomb Update</p>
         <button class="btn btn-primary" onclick="goTo('screen-host-setup')">ADMIN MODE</button>
         <button class="btn btn-gold" onclick="goTo('screen-part-join')">PESERTA MASUK</button>
     </div>
@@ -62,13 +73,14 @@
         <div id="qr-code" style="display:inline-block; background:white; padding:10px; border-radius:10px;"></div>
         <h2 style="margin:10px 0;">KODE: <span id="room-id">----</span></h2>
         <select id="g-type">
-            <option value="angka">🔢 Tebak Angka</option>
-            <option value="pancing">🧧 Angpao Terbang</option>
+            <option value="bomb">💣 Jinakkan Bom (Seru!)</option>
+            <option value="quiz">🧠 Kuis Cepat</option>
             <option value="redlight">🚦 Lampu Merah Hijau</option>
-            <option value="slot">🎰 Slot Untung</option>
+            <option value="pancing">🧧 Angpao Terbang</option>
+            <option value="angka">🔢 Tebak Angka</option>
         </select>
         <p id="player-count">0 Peserta</p>
-        <button class="btn btn-primary" onclick="startGame()">START GAME</button>
+        <button class="btn btn-primary" onclick="startGame()">MULAI GAME</button>
     </div>
 
     <div id="screen-part-join" class="card" style="display:none;">
@@ -82,6 +94,7 @@
     <div id="screen-part-lobby" class="card" style="display:none;">
         <h2 style="color:var(--primary)">SABAR...</h2>
         <p id="wait-name" style="font-weight:bold; color:var(--gold);"></p>
+        <p>Tunggu aba-aba Yudi ya!</p>
     </div>
 
     <div id="screen-game" style="display:none;">
@@ -94,9 +107,9 @@
             <button class="btn btn-gold" onclick="revealAll()">🎁 BUKA HASIL SEMUA</button>
             <button class="btn btn-danger" onclick="resetGame()">RESET / BALIK LOBBY</button>
             <div class="admin-panel">
-                <h4 style="margin:0; border-bottom:1px solid #ddd;">TABEL REKAP</h4>
+                <h4 style="margin:0; border-bottom:1px solid #ddd;">REKAP SEMENTARA</h4>
                 <table class="recap-table">
-                    <thead><tr><th>Nama</th><th>Status/Hasil</th></tr></thead>
+                    <thead><tr><th>Nama</th><th>Hasil/Status</th></tr></thead>
                     <tbody id="recap-body"></tbody>
                 </table>
             </div>
@@ -105,6 +118,7 @@
 </div>
 
 <script>
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
         apiKey: "AIzaSyAKuKWKtrcCnZdBPDo3X41Xv5ydKYSaSEs",
         authDomain: "thr-yudi.firebaseapp.com",
@@ -126,7 +140,7 @@
     }
 
     function initHost() {
-        if(document.getElementById('h-pass').value !== "yudi123") return alert("Akses Ditolak!");
+        if(document.getElementById('h-pass').value !== "yudi123") return alert("Admin Only!");
         isHost = true;
         myRoomId = Math.floor(1000 + Math.random() * 9000).toString();
         db.ref('active_sessions/' + myRoomId).set({ status: 'lobby', budget: parseInt(document.getElementById('h-budget').value), showResults: false });
@@ -140,7 +154,7 @@
     function initPart() {
         myName = document.getElementById('p-name').value.trim();
         myRoomId = document.getElementById('p-id').value.trim();
-        if(!myName || !myRoomId) return alert("Isi Nama & Kode!");
+        if(!myName || !myRoomId) return alert("Isi data!");
         db.ref(`active_sessions/${myRoomId}/players/${myName}`).set(true);
         document.getElementById('user-label').innerText = myName;
         document.getElementById('wait-name').innerText = myName;
@@ -165,60 +179,116 @@
         });
     }
 
-    function startGame() {
+    async function startGame() {
         const type = document.getElementById('g-type').value;
-        db.ref('active_sessions/' + myRoomId).once('value', snap => {
+        db.ref('active_sessions/' + myRoomId).once('value', async snap => {
             const ps = Object.keys(snap.val().players || {});
-            if(ps.length === 0) return alert("Belum ada peserta!");
+            if(ps.length === 0) return alert("Peserta kosong!");
             
             let totalBudget = snap.val().budget;
-            let count = ps.length;
-            let list = [];
-            let tempTotal = 0;
-
-            // Logika baru: Buat angka acak dulu, lalu skalakan ke budget asli
-            for(let i=0; i<count; i++) {
-                let r = 10 + Math.random() * 90; // Angka acak 10-100
-                list.push(r);
-                tempTotal += r;
+            let list = []; let tempTotal = 0;
+            for(let i=0; i<ps.length; i++){
+                let r = 20 + Math.random() * 80;
+                list.push(r); tempTotal += r;
             }
-            
-            // Skalakan ke budget asli dan bulatkan ke 1000 terdekat
             let finalBudgetList = list.map((val, i) => {
-                if(i === count - 1) return totalBudget - list.slice(0, -1).reduce((a,b) => a + Math.round((b/tempTotal * totalBudget)/1000)*1000, 0);
+                if(i === ps.length - 1) return totalBudget - list.slice(0, -1).reduce((a,b) => a + Math.round((b/tempTotal * totalBudget)/1000)*1000, 0);
                 return Math.round((val / tempTotal * totalBudget) / 1000) * 1000;
             });
 
-            // ACAK TOTAL daftar hadiahnya biar urutan masuk gak ngaruh
-            finalBudgetList.sort(() => Math.random() - 0.5);
+            // Sorting logic
+            if(type === 'quiz' || type === 'redlight') finalBudgetList.sort((a,b) => b-a);
+            else if(type === 'bomb') finalBudgetList.sort((a,b) => b-a); // High to low for wires
+            else finalBudgetList.sort(() => Math.random() - 0.5);
 
-            // Khusus RedLight tetap urut besar-kecil karena itu sistem ranking
-            if(type === 'redlight') finalBudgetList.sort((a,b) => b-a);
+            let extraData = {};
+            if(type === 'quiz') {
+                const response = await fetch('soal.json');
+                const qd = await response.json();
+                extraData.quiz = qd[Math.floor(Math.random() * qd.length)];
+            }
+            if(type === 'bomb') {
+                extraData.bombIdx = Math.floor(Math.random() * ps.length);
+            }
 
             db.ref('active_sessions/' + myRoomId).update({ 
-                status: 'playing', 
-                gameType: type, 
-                budgetList: finalBudgetList, 
-                showResults: (type === 'slot' || type === 'redlight'), 
-                light: 'red' 
+                status: 'playing', gameType: type, budgetList: finalBudgetList, 
+                showResults: (type === 'quiz' || type === 'redlight' || type === 'bomb'), 
+                light: 'red', ...extraData 
             });
             if(type === 'redlight') startLightCycle();
         });
     }
 
     function render() {
-        const box = document.getElementById('game-box');
-        box.innerHTML = "";
+        const box = document.getElementById('game-box'); box.innerHTML = "";
         document.getElementById('game-label').innerText = room.gameType.toUpperCase();
-        if(isHost) {
-            box.innerHTML = "<p style='text-align:center; padding-top:120px; color:#aaa;'>ADMIN MONITOR</p>";
-            updateRecap();
-        } else {
-            if(room.gameType === 'pancing') renderPancing();
+        if(isHost) { box.innerHTML = "<p style='text-align:center; padding-top:160px; color:#aaa;'>MONITORING...</p>"; updateRecap(); }
+        else {
+            if(room.gameType === 'bomb') renderBomb();
+            else if(room.gameType === 'quiz') renderQuiz();
+            else if(room.gameType === 'pancing') renderPancing();
             else if(room.gameType === 'angka') renderAngka();
             else if(room.gameType === 'redlight') renderRedLight();
-            else renderSlot();
         }
+    }
+
+    // --- NEW GAME: BOMB DEFUSER ---
+    function renderBomb() {
+        const box = document.getElementById('game-box');
+        let myD = null;
+        if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === myName) myD = s; });
+        if(myD) {
+            box.innerHTML = `<div style="text-align:center; padding-top:100px;">
+                <h2>${myD.isBomb ? '💥 BOOOOMM!!' : '✂️ KABEL AMAN'}</h2>
+                ${room.showResults ? `<h1>Rp${myD.val.toLocaleString()}</h1>` : '<p>Tunggu lainnya...</p>'}
+            </div>`;
+            if(room.showResults) handleVoice(myD.val); return;
+        }
+
+        const colors = ['#3498db', '#e74c3c', '#f1c40f', '#2ecc71', '#9b59b6', '#e67e22'];
+        box.innerHTML = `<p style="text-align:center; color:#fff; margin-top:10px;">POTONG SATU KABEL!</p><div class="wire-container"></div>`;
+        const container = box.querySelector('.wire-container');
+        
+        room.budgetList.forEach((val, i) => {
+            const isTaken = room.selections && room.selections[i];
+            const w = document.createElement('div');
+            w.className = `wire ${isTaken ? 'cut' : ''}`;
+            w.style.backgroundColor = colors[i % colors.length];
+            w.onclick = () => { if(!isTaken && !hasPicked) pickBomb(i); };
+            container.appendChild(w);
+        });
+    }
+
+    function pickBomb(i) {
+        const isBomb = (i === room.bombIdx);
+        const val = isBomb ? Math.min(...room.budgetList) : room.budgetList[i]; // Bomb gets smallest
+        db.ref(`active_sessions/${myRoomId}/selections/${i}`).transaction(c => c === null ? { name: myName, val: val, isBomb: isBomb } : undefined, (err, ok) => { 
+            if(ok) { hasPicked = true; if(!isBomb) confetti(); else alert("Duar! Kamu kena bom!"); } 
+        });
+    }
+
+    // --- OTHER GAMES (RE-SYNCED) ---
+    function renderQuiz() {
+        const box = document.getElementById('game-box');
+        let myD = null;
+        if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === myName) myD = s; });
+        if(myD) {
+            box.innerHTML = `<div style="text-align:center; padding-top:100px;">
+                <h2 style="color:${myD.correct ? 'green' : 'red'}">${myD.correct ? '✅ BENAR!' : '❌ SALAH!'}</h2>
+                ${room.showResults ? `<h1>Rp${myD.val.toLocaleString()}</h1>` : '<p>Sabar...</p>'}
+            </div>`;
+            if(room.showResults) handleVoice(myD.val); return;
+        }
+        const q = room.quiz;
+        box.innerHTML = `<div class="timer-bar"><div id="timer-inner"></div></div><div class="quiz-q">${q.q}</div><div class="quiz-options"></div>`;
+        const opts = box.querySelector('.quiz-options');
+        q.o.forEach(opt => {
+            const b = document.createElement('button'); b.className = "opt-btn"; b.innerText = opt;
+            b.onclick = () => { db.ref(`active_sessions/${myRoomId}/selections`).push({ name: myName, correct: (opt === q.a), time: Date.now() }); confetti(); };
+            opts.appendChild(b);
+        });
+        setTimeout(() => { document.getElementById('timer-inner').style.width = '0%'; }, 100);
     }
 
     function renderPancing() {
@@ -226,87 +296,30 @@
         let myD = null;
         if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === myName) myD = s; });
         if(myD) {
-            box.innerHTML = `<div style="text-align:center; padding-top:80px;"><h2>🧧 DAPET!</h2>
-            ${room.showResults ? `<h1>Rp${myD.val.toLocaleString()}</h1>` : '<p>Sabar, nunggu Yudi...</p>'}</div>`;
+            box.innerHTML = `<div style="text-align:center; padding-top:100px;"><h2>🧧 DAPET!</h2>
+            ${room.showResults ? `<h1>Rp${myD.val.toLocaleString()}</h1>` : '<p>Tunggu...</p>'}</div>`;
             if(room.showResults) handleVoice(myD.val); return;
         }
-        room.budgetList.forEach((val, i) => {
+        room.budgetList.forEach((v, i) => {
             if(!room.selections || !room.selections[i]) {
                 const el = document.createElement('div'); el.className = "angpao";
-                el.style.left = Math.random() * 80 + "%"; el.style.animationDuration = (2 + Math.random() * 2) + "s";
-                el.onclick = () => pick(i, val); box.appendChild(el);
+                el.style.left = Math.random() * 85 + "%"; el.style.animationDuration = (1.5 + Math.random() * 2) + "s";
+                el.onclick = () => pick(i, v); box.appendChild(el);
             }
         });
     }
 
     function renderAngka() {
-        const box = document.getElementById('game-box');
-        box.innerHTML = "<div class='grid-game'></div>";
+        const box = document.getElementById('game-box'); box.innerHTML = "<div class='grid-game'></div>";
         const grid = box.querySelector('.grid-game');
-        room.budgetList.forEach((val, i) => {
+        room.budgetList.forEach((v, i) => {
             const sel = room.selections ? room.selections[i] : null;
-            const el = document.createElement('div');
-            el.className = `cell ${sel ? (sel.name === myName ? 'mine' : 'taken') : ''}`;
-            if(room.showResults && sel && sel.name === myName) { el.innerText = `Rp${val.toLocaleString()}`; handleVoice(val); }
+            const el = document.createElement('div'); el.className = `cell ${sel ? (sel.name === myName ? 'mine' : 'taken') : ''}`;
+            if(room.showResults && sel && sel.name === myName) { el.innerText = `Rp${v.toLocaleString()}`; handleVoice(v); }
             else { el.innerText = sel ? (sel.name === myName ? "OK" : "X") : i+1; }
-            el.onclick = () => { if(!hasPicked && !sel) pick(i, val); };
+            el.onclick = () => { if(!hasPicked && !sel) pick(i, v); };
             grid.appendChild(el);
         });
-    }
-
-    function renderSlot() {
-        const box = document.getElementById('game-box');
-        let myW = null;
-        if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === myName) myW = s.val; });
-        if(myW) { 
-            clearInterval(slotInterval);
-            box.innerHTML = `<div style="text-align:center; padding-top:100px;"><h1>🎰 Rp${myW.toLocaleString()}</h1></div>`; 
-            handleVoice(myW); 
-        } else {
-            box.innerHTML = `<div style="padding:20px; text-align:center;"><div id="slot-val" class="slot-display">Rp????</div>
-                <div id="slot-ctrl"><button id="btn-spin" class="btn btn-gold" onclick="startSlotAnim()">SPIN SLOT 🎰</button></div></div>`;
-        }
-    }
-
-    function startSlotAnim() {
-        const btnArea = document.getElementById('slot-ctrl');
-        const slotVal = document.getElementById('slot-val');
-        btnArea.innerHTML = `<button class="btn btn-danger" onclick="stopSlotAndPick()">STOP 🛑</button>`;
-        clearInterval(slotInterval);
-        slotInterval = setInterval(() => {
-            const randomVal = Math.floor(Math.random() * 100) * 1000;
-            slotVal.innerText = `Rp${randomVal.toLocaleString()}`;
-        }, 80);
-    }
-
-    function stopSlotAndPick() {
-        clearInterval(slotInterval);
-        db.ref(`active_sessions/${myRoomId}`).once('value', snap => {
-            const d = snap.val();
-            let av = d.budgetList.map((_, i) => i).filter(idx => !d.selections || !d.selections[idx]);
-            if(av.length > 0) { pick(av[0], d.budgetList[av[0]]); }
-        });
-    }
-
-    function startLightCycle() {
-        if(!isHost) return;
-        const cycle = () => {
-            if(!room || room.status !== 'playing') return;
-            let next = room.light === 'red' ? 'green' : 'red';
-            let time = next === 'green' ? (2000 + Math.random() * 3000) : (1500 + Math.random() * 2000);
-            db.ref(`active_sessions/${myRoomId}/light`).set(next);
-            setTimeout(cycle, time);
-        };
-        cycle();
-    }
-
-    function handleLightSync() {
-        currentLight = room.light;
-        const indicator = document.getElementById('light-ind');
-        if(indicator) {
-            indicator.className = `light-indicator light-${currentLight}`;
-            indicator.innerText = currentLight === 'red' ? 'BERHENTI! 🛑' : 'JALAN! 🏃';
-        }
     }
 
     function renderRedLight() {
@@ -314,30 +327,40 @@
         let myD = null;
         if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === myName) myD = s; });
         if(myD && walkProgress >= 100) {
-            box.innerHTML = `<div style="text-align:center; padding-top:80px;"><h2>🏁 FINISH!</h2>
-            ${room.showResults ? `<h1>Rp${myD.val.toLocaleString()}</h1>` : '<p>Tunggu hasil...</p>'}</div>`;
+            box.innerHTML = `<div style="text-align:center; padding-top:100px;"><h2>🏁 FINISH!</h2>
+            ${room.showResults ? `<h1>Rp${myD.val.toLocaleString()}</h1>` : '<p>Sabar...</p>'}</div>`;
             if(room.showResults) handleVoice(myD.val); return;
         }
-        box.innerHTML = `
-            <div id="light-ind" class="light-indicator light-${currentLight}">${currentLight === 'red' ? 'BERHENTI! 🛑' : 'JALAN! 🏃'}</div>
-            <div class="progress-bar"><div id="progress-inner" style="width:${walkProgress}%"></div></div>
-            <button class="walk-btn" onclick="stepForward()">MAJU</button>
-        `;
+        box.innerHTML = `<div id="light-ind" class="light-indicator light-${currentLight}">${currentLight === 'red' ? '🛑' : '🏃'}</div>
+            <div style="width:85%; height:15px; background:#eee; border-radius:10px; margin:20px auto; overflow:hidden;">
+                <div id="progress-inner" style="width:${walkProgress}%; height:100%; background:var(--primary); transition:0.2s;"></div>
+            </div>
+            <button style="width:100px; height:100px; border-radius:50%; background:var(--gold); border:4px solid #fff; display:block; margin:auto;" onclick="stepForward()">TAP!</button>`;
     }
 
     function stepForward() {
         if(walkProgress >= 100) return;
-        if(currentLight === 'red') {
-            walkProgress = Math.max(0, walkProgress - 15);
-            alert("Kena tangkap! Mundur!");
-        } else {
-            walkProgress += 5;
-        }
+        if(currentLight === 'red') { walkProgress = Math.max(0, walkProgress - 20); }
+        else { walkProgress += 5; }
         document.getElementById('progress-inner').style.width = walkProgress + "%";
-        if(walkProgress >= 100) {
-            db.ref(`active_sessions/${myRoomId}/selections`).push({ name: myName, progress: 100, time: Date.now() });
-            confetti();
-        }
+        if(walkProgress >= 100) { db.ref(`active_sessions/${myRoomId}/selections`).push({ name: myName, time: Date.now() }); confetti(); }
+    }
+
+    function startLightCycle() {
+        if(!isHost) return;
+        const cycle = () => {
+            if(!room || room.status !== 'playing') return;
+            let next = room.light === 'red' ? 'green' : 'red';
+            db.ref(`active_sessions/${myRoomId}/light`).set(next);
+            setTimeout(cycle, next === 'green' ? 2200 : 1800);
+        };
+        cycle();
+    }
+
+    function handleLightSync() {
+        currentLight = room.light;
+        const ind = document.getElementById('light-ind');
+        if(ind) { ind.className = `light-indicator light-${currentLight}`; ind.innerText = currentLight === 'red' ? 'STOP! 🛑' : 'JALAN! 🏃'; }
     }
 
     function pick(i, v) {
@@ -346,24 +369,13 @@
 
     function updateRecap() {
         const body = document.getElementById('recap-body'); body.innerHTML = "";
-        if(room.gameType === 'redlight' && room.selections) {
-            let res = Object.values(room.selections).sort((a, b) => a.time - b.time);
-            res.forEach((s, idx) => {
-                let nominal = room.budgetList[idx] || 0;
-                if(room.showResults && s.val === undefined) {
-                    db.ref(`active_sessions/${myRoomId}/selections`).once('value', snap => {
-                        snap.forEach(c => { if(c.val().name === s.name) c.ref.update({val: nominal}); });
-                    });
-                }
-                body.innerHTML += `<tr><td>${s.name}</td><td>Finish #${idx+1} ⮕ <b>Rp${nominal.toLocaleString()}</b></td></tr>`;
-            });
-        } else {
-            Object.keys(room.players || {}).forEach(p => {
-                let r = "⏳";
-                if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === p) r = room.showResults ? `<b>Rp${s.val.toLocaleString()}</b>` : '✅'; });
-                body.innerHTML += `<tr><td>${p}</td><td>${r}</td></tr>`;
-            });
-        }
+        if(!room.selections) return;
+        const sels = Object.values(room.selections);
+        sels.forEach((s, idx) => {
+            let res = s.val ? `Rp${s.val.toLocaleString()}` : 'Menunggu...';
+            if(room.gameType === 'bomb' && s.isBomb) res = "💥 BOM (" + res + ")";
+            body.innerHTML += `<tr><td>${s.name}</td><td>${res}</td></tr>`;
+        });
     }
 
     function startScan() {
@@ -373,14 +385,13 @@
 
     function handleVoice(amt) {
         if(spoken) return; spoken = true;
-        const msg = new SpeechSynthesisUtterance(`Selamat ${myName}, dapet ${amt} rupiah!`);
+        const msg = new SpeechSynthesisUtterance(`Selamat ${myName}, kamu dapet ${amt} rupiah!`);
         msg.lang = 'id-ID'; window.speechSynthesis.speak(msg);
     }
 
     function revealAll() { db.ref(`active_sessions/${myRoomId}/showResults`).set(true); confetti(); }
     function resetGame() { 
         hasPicked = false; spoken = false; walkProgress = 0;
-        clearInterval(slotInterval);
         db.ref(`active_sessions/${myRoomId}`).update({ status: 'lobby', selections: null, showResults: false, light: 'red' }); 
     }
 </script>
