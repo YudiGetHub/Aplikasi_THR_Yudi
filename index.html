@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>THR Yudi v35.0 - Slot Animation</title>
+    <title>THR Yudi v38.1</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
@@ -28,20 +28,28 @@
             text-align: center; font-family: inherit; box-sizing: border-box; display: block;
         }
 
-        #game-box { position: relative; width: 100%; height: 300px; background: rgba(0,0,0,0.5); border-radius: 15px; overflow: hidden; border: 2px solid var(--gold); margin-bottom: 10px; }
+        #game-box { position: relative; width: 100%; height: 320px; background: rgba(0,0,0,0.5); border-radius: 15px; overflow: hidden; border: 2px solid var(--gold); margin-bottom: 10px; }
         
-        /* Slot Animation Style */
+        /* Game Visuals */
         .slot-display { font-size: 3em; font-weight: 800; color: var(--gold); text-shadow: 0 0 10px rgba(212,175,55,0.5); margin-top: 70px; }
-        
+        .angpao { position: absolute; width: 45px; height: 65px; background: #e63946; border: 2px solid var(--gold); border-radius: 5px; animation: fall linear infinite; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2em; }
+        .angpao::after { content: '🧧'; }
+        @keyframes fall { 0% { transform: translateY(-80px); } 100% { transform: translateY(320px); } }
+
+        /* Red Light Green Light Style */
+        .light-indicator { width: 100%; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; font-weight: 800; transition: 0.3s; }
+        .light-red { background: #ff4d4d; color: #fff; }
+        .light-green { background: #47d147; color: #fff; }
+        .walk-btn { width: 120px; height: 120px; border-radius: 50%; background: var(--gold); color: white; font-size: 1.2em; font-weight: 800; border: 5px solid white; margin: 20px auto; cursor: pointer; box-shadow: 0 6px 0 #b8860b; }
+        .walk-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #b8860b; }
+        .progress-bar { width: 80%; height: 20px; background: #eee; border-radius: 10px; margin: 10px auto; overflow: hidden; border: 1px solid #ccc; }
+        #progress-inner { width: 0%; height: 100%; background: var(--primary); transition: 0.2s; }
+
         .admin-panel { background: var(--white); border-radius: 15px; padding: 15px; color: #333; margin-top: 10px; border: 3px solid var(--gold); }
         .recap-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
         .recap-table th { background: #f0f0f0; padding: 8px; text-align: left; border-bottom: 2px solid #ddd; }
         .recap-table td { padding: 8px; border-bottom: 1px solid #eee; }
 
-        .angpao { position: absolute; width: 45px; height: 65px; background: #e63946; border: 2px solid var(--gold); border-radius: 5px; animation: fall linear infinite; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2em; }
-        .angpao::after { content: '🧧'; }
-        @keyframes fall { 0% { transform: translateY(-80px); } 100% { transform: translateY(320px); } }
-        
         .grid-game { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
         .cell { background: #fff; height: 55px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #ddd; color: #333; }
         .cell.mine { background: var(--gold) !important; color: white; }
@@ -70,6 +78,7 @@
         <select id="g-type">
             <option value="angka">🔢 Tebak Angka</option>
             <option value="pancing">🧧 Angpao Terbang</option>
+            <option value="redlight">🚦 Lampu Merah Hijau</option>
             <option value="slot">🎰 Slot Untung</option>
         </select>
         <p id="player-count">0 Peserta</p>
@@ -106,7 +115,7 @@
             <div class="admin-panel">
                 <h4 style="margin:0; border-bottom:1px solid #ddd;">TABEL REKAP</h4>
                 <table class="recap-table">
-                    <thead><tr><th>Nama</th><th>THR</th></tr></thead>
+                    <thead><tr><th>Nama</th><th>Status/Hasil</th></tr></thead>
                     <tbody id="recap-body"></tbody>
                 </table>
             </div>
@@ -128,7 +137,7 @@
     const db = firebase.database();
 
     let room = null, myName = "", myRoomId = "", isHost = false, hasPicked = false, spoken = false;
-    let slotInterval = null; // Untuk animasi acak
+    let slotInterval = null, walkProgress = 0, currentLight = "red";
 
     function goTo(id) {
         document.querySelectorAll('.card, #screen-game, #screen-part-lobby').forEach(s => s.style.display = 'none');
@@ -166,6 +175,7 @@
             if(room.status === 'playing') {
                 goTo('screen-game');
                 document.getElementById('host-controls').style.display = isHost ? 'block' : 'none';
+                if(room.gameType === 'redlight') handleLightSync();
                 render();
             } else if(room.status === 'lobby') {
                 if(isHost) goTo('screen-host-lobby');
@@ -187,8 +197,9 @@
                     list.push(s); current += s;
                 }
             }
-            list.sort(() => Math.random() - 0.5);
-            db.ref('active_sessions/' + myRoomId).update({ status: 'playing', gameType: type, budgetList: list, showResults: (type === 'slot') });
+            list.sort((a, b) => b - a);
+            db.ref('active_sessions/' + myRoomId).update({ status: 'playing', gameType: type, budgetList: list, showResults: (type === 'slot' || type === 'redlight'), light: 'red' });
+            if(type === 'redlight') startLightCycle();
         });
     }
 
@@ -202,10 +213,12 @@
         } else {
             if(room.gameType === 'pancing') renderPancing();
             else if(room.gameType === 'angka') renderAngka();
+            else if(room.gameType === 'redlight') renderRedLight();
             else renderSlot();
         }
     }
 
+    // --- GAME 1: ANGPAO TERBANG ---
     function renderPancing() {
         const box = document.getElementById('game-box');
         let myD = null;
@@ -213,8 +226,7 @@
         if(myD) {
             box.innerHTML = `<div style="text-align:center; padding-top:80px;"><h2>🧧 DAPET!</h2>
             ${room.showResults ? `<h1>Rp${myD.val.toLocaleString()}</h1>` : '<p>Sabar, nunggu Yudi...</p>'}</div>`;
-            if(room.showResults) handleVoice(myD.val);
-            return;
+            if(room.showResults) handleVoice(myD.val); return;
         }
         room.budgetList.forEach((val, i) => {
             if(!room.selections || !room.selections[i]) {
@@ -225,6 +237,7 @@
         });
     }
 
+    // --- GAME 2: TEBAK ANGKA ---
     function renderAngka() {
         const box = document.getElementById('game-box');
         box.innerHTML = "<div class='grid-game'></div>";
@@ -240,41 +253,30 @@
         });
     }
 
-    // --- MODIFIKASI SLOT: ANIMASI & TOMBOL STOP ---
+    // --- GAME 3: SLOT UNTUNG (DENGAN STOP) ---
     function renderSlot() {
         const box = document.getElementById('game-box');
         let myW = null;
         if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === myName) myW = s.val; });
-        
         if(myW) { 
-            clearInterval(slotInterval); // Stop animasi jika hasil sudah ada
+            clearInterval(slotInterval);
             box.innerHTML = `<div style="text-align:center; padding-top:100px;"><h1>🎰 Rp${myW.toLocaleString()}</h1></div>`; 
             handleVoice(myW); 
         } else {
-            // Tampilan Animasi Spin & Tombol
-            box.innerHTML = `
-                <div style="padding:20px; text-align:center;">
-                    <div id="slot-val" class="slot-display">Rp????</div>
-                    <div id="slot-ctrl">
-                        <button id="btn-spin" class="btn btn-gold" onclick="startSlotAnim()">SPIN SLOT 🎰</button>
-                    </div>
-                </div>`;
+            box.innerHTML = `<div style="padding:20px; text-align:center;"><div id="slot-val" class="slot-display">Rp????</div>
+                <div id="slot-ctrl"><button id="btn-spin" class="btn btn-gold" onclick="startSlotAnim()">SPIN SLOT 🎰</button></div></div>`;
         }
     }
 
     function startSlotAnim() {
         const btnArea = document.getElementById('slot-ctrl');
         const slotVal = document.getElementById('slot-val');
-        
-        // Ubah tombol jadi STOP
         btnArea.innerHTML = `<button class="btn btn-danger" onclick="stopSlotAndPick()">STOP 🛑</button>`;
-        
-        // Jalankan animasi acak angka
         clearInterval(slotInterval);
         slotInterval = setInterval(() => {
             const randomVal = Math.floor(Math.random() * 100) * 1000;
             slotVal.innerText = `Rp${randomVal.toLocaleString()}`;
-        }, 80); // Speed acak 80ms
+        }, 80);
     }
 
     function stopSlotAndPick() {
@@ -282,27 +284,90 @@
         db.ref(`active_sessions/${myRoomId}`).once('value', snap => {
             const d = snap.val();
             let av = d.budgetList.map((_, i) => i).filter(idx => !d.selections || !d.selections[idx]);
-            if(av.length > 0) {
-                // Ambil satu dari yang tersedia
-                const targetIdx = av[Math.floor(Math.random() * av.length)];
-                pick(targetIdx, d.budgetList[targetIdx]);
-            }
+            if(av.length > 0) { pick(av[0], d.budgetList[av[0]]); }
         });
     }
-    // --- AKHIR MODIFIKASI SLOT ---
 
+    // --- GAME 4: LAMPU MERAH HIJAU ---
+    function startLightCycle() {
+        if(!isHost) return;
+        const cycle = () => {
+            if(!room || room.status !== 'playing') return;
+            let next = room.light === 'red' ? 'green' : 'red';
+            let time = next === 'green' ? (2000 + Math.random() * 3000) : (1500 + Math.random() * 2000);
+            db.ref(`active_sessions/${myRoomId}/light`).set(next);
+            setTimeout(cycle, time);
+        };
+        cycle();
+    }
+
+    function handleLightSync() {
+        currentLight = room.light;
+        const indicator = document.getElementById('light-ind');
+        if(indicator) {
+            indicator.className = `light-indicator light-${currentLight}`;
+            indicator.innerText = currentLight === 'red' ? 'BERHENTI! 🛑' : 'JALAN! 🏃';
+        }
+    }
+
+    function renderRedLight() {
+        const box = document.getElementById('game-box');
+        let myD = null;
+        if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === myName) myD = s; });
+
+        if(myD && walkProgress >= 100) {
+            box.innerHTML = `<div style="text-align:center; padding-top:80px;"><h2>🏁 FINISH!</h2>
+            ${room.showResults ? `<h1>Rp${myD.val.toLocaleString()}</h1>` : '<p>Tunggu hasil diumumkan Yudi...</p>'}</div>`;
+            if(room.showResults) handleVoice(myD.val); return;
+        }
+
+        box.innerHTML = `
+            <div id="light-ind" class="light-indicator light-${currentLight}">${currentLight === 'red' ? 'BERHENTI! 🛑' : 'JALAN! 🏃'}</div>
+            <div class="progress-bar"><div id="progress-inner" style="width:${walkProgress}%"></div></div>
+            <button class="walk-btn" onclick="stepForward()">MAJU</button>
+        `;
+    }
+
+    function stepForward() {
+        if(walkProgress >= 100) return;
+        if(currentLight === 'red') {
+            walkProgress = Math.max(0, walkProgress - 15);
+            alert("Kena tangkap! Mundur!");
+        } else {
+            walkProgress += 5;
+        }
+        document.getElementById('progress-inner').style.width = walkProgress + "%";
+        if(walkProgress >= 100) {
+            db.ref(`active_sessions/${myRoomId}/selections`).push({ name: myName, progress: 100, time: Date.now() });
+            confetti();
+        }
+    }
+
+    // --- CORE LOGICS ---
     function pick(i, v) {
         db.ref(`active_sessions/${myRoomId}/selections/${i}`).transaction(c => c === null ? { name: myName, val: v } : undefined, (err, ok) => { if(ok) { hasPicked = true; confetti(); } });
     }
 
     function updateRecap() {
-        const body = document.getElementById('recap-body');
-        body.innerHTML = "";
-        Object.keys(room.players || {}).forEach(p => {
-            let res = "⏳";
-            if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === p) res = room.showResults ? `<b>Rp${s.val.toLocaleString()}</b>` : '✅'; });
-            body.innerHTML += `<tr><td>${p}</td><td>${res}</td></tr>`;
-        });
+        const body = document.getElementById('recap-body'); body.innerHTML = "";
+        if(room.gameType === 'redlight' && room.selections) {
+            let res = Object.values(room.selections).sort((a, b) => a.time - b.time);
+            res.forEach((s, idx) => {
+                let nominal = room.budgetList[idx] || 0;
+                if(room.showResults && s.val === undefined) {
+                    db.ref(`active_sessions/${myRoomId}/selections`).once('value', snap => {
+                        snap.forEach(c => { if(c.val().name === s.name) c.ref.update({val: nominal}); });
+                    });
+                }
+                body.innerHTML += `<tr><td>${s.name}</td><td>Finish #${idx+1} ⮕ <b>Rp${nominal.toLocaleString()}</b></td></tr>`;
+            });
+        } else {
+            Object.keys(room.players || {}).forEach(p => {
+                let r = "⏳";
+                if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === p) r = room.showResults ? `<b>Rp${s.val.toLocaleString()}</b>` : '✅'; });
+                body.innerHTML += `<tr><td>${p}</td><td>${r}</td></tr>`;
+            });
+        }
     }
 
     function startScan() {
@@ -318,9 +383,9 @@
 
     function revealAll() { db.ref(`active_sessions/${myRoomId}/showResults`).set(true); confetti(); }
     function resetGame() { 
-        hasPicked = false; spoken = false; 
+        hasPicked = false; spoken = false; walkProgress = 0;
         clearInterval(slotInterval);
-        db.ref(`active_sessions/${myRoomId}`).update({ status: 'lobby', selections: null, showResults: false }); 
+        db.ref(`active_sessions/${myRoomId}`).update({ status: 'lobby', selections: null, showResults: false, light: 'red' }); 
     }
 </script>
 </body>
