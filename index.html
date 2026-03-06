@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>THR Yudi v34.0 - Input Fix</title>
+    <title>THR Yudi v35.0 - Slot Animation</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
@@ -23,20 +23,15 @@
         .btn-danger { background: #d32f2f; color: white; box-shadow: 0 4px 0 #9a1f1f; }
         .btn-primary { background: var(--primary); color: var(--gold); }
 
-        /* FIX: Menambahkan box-sizing agar input tidak melebihi kotak */
         input, select { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 8px 0; 
-            border: 1px solid #ccc; 
-            border-radius: 10px; 
-            text-align: center; 
-            font-family: inherit;
-            box-sizing: border-box; /* Ini kuncinya biar gak meluber */
-            display: block;
+            width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 10px; 
+            text-align: center; font-family: inherit; box-sizing: border-box; display: block;
         }
 
         #game-box { position: relative; width: 100%; height: 300px; background: rgba(0,0,0,0.5); border-radius: 15px; overflow: hidden; border: 2px solid var(--gold); margin-bottom: 10px; }
+        
+        /* Slot Animation Style */
+        .slot-display { font-size: 3em; font-weight: 800; color: var(--gold); text-shadow: 0 0 10px rgba(212,175,55,0.5); margin-top: 70px; }
         
         .admin-panel { background: var(--white); border-radius: 15px; padding: 15px; color: #333; margin-top: 10px; border: 3px solid var(--gold); }
         .recap-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
@@ -133,6 +128,7 @@
     const db = firebase.database();
 
     let room = null, myName = "", myRoomId = "", isHost = false, hasPicked = false, spoken = false;
+    let slotInterval = null; // Untuk animasi acak
 
     function goTo(id) {
         document.querySelectorAll('.card, #screen-game, #screen-part-lobby').forEach(s => s.style.display = 'none');
@@ -244,24 +240,59 @@
         });
     }
 
+    // --- MODIFIKASI SLOT: ANIMASI & TOMBOL STOP ---
     function renderSlot() {
         const box = document.getElementById('game-box');
         let myW = null;
         if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === myName) myW = s.val; });
-        if(myW) { box.innerHTML = `<div style="text-align:center; padding-top:100px;"><h1>🎰 Rp${myW.toLocaleString()}</h1></div>`; handleVoice(myW); }
-        else { box.innerHTML = `<div style="padding:20px;"><button class="btn btn-gold" onclick="spin()">PUTAR SLOT 🎰</button></div>`; }
+        
+        if(myW) { 
+            clearInterval(slotInterval); // Stop animasi jika hasil sudah ada
+            box.innerHTML = `<div style="text-align:center; padding-top:100px;"><h1>🎰 Rp${myW.toLocaleString()}</h1></div>`; 
+            handleVoice(myW); 
+        } else {
+            // Tampilan Animasi Spin & Tombol
+            box.innerHTML = `
+                <div style="padding:20px; text-align:center;">
+                    <div id="slot-val" class="slot-display">Rp????</div>
+                    <div id="slot-ctrl">
+                        <button id="btn-spin" class="btn btn-gold" onclick="startSlotAnim()">SPIN SLOT 🎰</button>
+                    </div>
+                </div>`;
+        }
     }
 
-    function pick(i, v) {
-        db.ref(`active_sessions/${myRoomId}/selections/${i}`).transaction(c => c === null ? { name: myName, val: v } : undefined, (err, ok) => { if(ok) { hasPicked = true; confetti(); } });
+    function startSlotAnim() {
+        const btnArea = document.getElementById('slot-ctrl');
+        const slotVal = document.getElementById('slot-val');
+        
+        // Ubah tombol jadi STOP
+        btnArea.innerHTML = `<button class="btn btn-danger" onclick="stopSlotAndPick()">STOP 🛑</button>`;
+        
+        // Jalankan animasi acak angka
+        clearInterval(slotInterval);
+        slotInterval = setInterval(() => {
+            const randomVal = Math.floor(Math.random() * 100) * 1000;
+            slotVal.innerText = `Rp${randomVal.toLocaleString()}`;
+        }, 80); // Speed acak 80ms
     }
 
-    function spin() {
+    function stopSlotAndPick() {
+        clearInterval(slotInterval);
         db.ref(`active_sessions/${myRoomId}`).once('value', snap => {
             const d = snap.val();
             let av = d.budgetList.map((_, i) => i).filter(idx => !d.selections || !d.selections[idx]);
-            if(av.length > 0) pick(av[0], d.budgetList[av[0]]);
+            if(av.length > 0) {
+                // Ambil satu dari yang tersedia
+                const targetIdx = av[Math.floor(Math.random() * av.length)];
+                pick(targetIdx, d.budgetList[targetIdx]);
+            }
         });
+    }
+    // --- AKHIR MODIFIKASI SLOT ---
+
+    function pick(i, v) {
+        db.ref(`active_sessions/${myRoomId}/selections/${i}`).transaction(c => c === null ? { name: myName, val: v } : undefined, (err, ok) => { if(ok) { hasPicked = true; confetti(); } });
     }
 
     function updateRecap() {
@@ -286,7 +317,11 @@
     }
 
     function revealAll() { db.ref(`active_sessions/${myRoomId}/showResults`).set(true); confetti(); }
-    function resetGame() { hasPicked = false; spoken = false; db.ref(`active_sessions/${myRoomId}`).update({ status: 'lobby', selections: null, showResults: false }); }
+    function resetGame() { 
+        hasPicked = false; spoken = false; 
+        clearInterval(slotInterval);
+        db.ref(`active_sessions/${myRoomId}`).update({ status: 'lobby', selections: null, showResults: false }); 
+    }
 </script>
 </body>
 </html>
