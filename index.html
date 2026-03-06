@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>THR Yudi v38.1</title>
+    <title>THR Yudi v39.0 - Fair Mode</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
@@ -15,28 +15,17 @@
         body { font-family: 'Poppins', sans-serif; background: var(--dark); color: #fff; margin: 0; padding: 0; }
         .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #113311 0%, #051a06 100%); z-index: -1; }
         .container { max-width: 450px; margin: auto; padding: 10px; display: flex; flex-direction: column; min-height: 100vh; }
-        
         .card { background: rgba(255,255,255,0.95); border-radius: 15px; padding: 15px; color: #111; border: 2px solid var(--gold); margin-bottom: 10px; text-align: center; }
-        
         .btn { border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; width: 100%; margin-top: 8px; text-transform: uppercase; }
         .btn-gold { background: var(--gold); color: white; box-shadow: 0 4px 0 #b8860b; }
         .btn-danger { background: #d32f2f; color: white; box-shadow: 0 4px 0 #9a1f1f; }
         .btn-primary { background: var(--primary); color: var(--gold); }
-
-        input, select { 
-            width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 10px; 
-            text-align: center; font-family: inherit; box-sizing: border-box; display: block;
-        }
-
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 10px; text-align: center; font-family: inherit; box-sizing: border-box; display: block; }
         #game-box { position: relative; width: 100%; height: 320px; background: rgba(0,0,0,0.5); border-radius: 15px; overflow: hidden; border: 2px solid var(--gold); margin-bottom: 10px; }
-        
-        /* Game Visuals */
         .slot-display { font-size: 3em; font-weight: 800; color: var(--gold); text-shadow: 0 0 10px rgba(212,175,55,0.5); margin-top: 70px; }
         .angpao { position: absolute; width: 45px; height: 65px; background: #e63946; border: 2px solid var(--gold); border-radius: 5px; animation: fall linear infinite; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2em; }
         .angpao::after { content: '🧧'; }
         @keyframes fall { 0% { transform: translateY(-80px); } 100% { transform: translateY(320px); } }
-
-        /* Red Light Green Light Style */
         .light-indicator { width: 100%; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 1.5em; font-weight: 800; transition: 0.3s; }
         .light-red { background: #ff4d4d; color: #fff; }
         .light-green { background: #47d147; color: #fff; }
@@ -44,12 +33,10 @@
         .walk-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #b8860b; }
         .progress-bar { width: 80%; height: 20px; background: #eee; border-radius: 10px; margin: 10px auto; overflow: hidden; border: 1px solid #ccc; }
         #progress-inner { width: 0%; height: 100%; background: var(--primary); transition: 0.2s; }
-
         .admin-panel { background: var(--white); border-radius: 15px; padding: 15px; color: #333; margin-top: 10px; border: 3px solid var(--gold); }
         .recap-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
         .recap-table th { background: #f0f0f0; padding: 8px; text-align: left; border-bottom: 2px solid #ddd; }
         .recap-table td { padding: 8px; border-bottom: 1px solid #eee; }
-
         .grid-game { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
         .cell { background: #fff; height: 55px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #ddd; color: #333; }
         .cell.mine { background: var(--gold) !important; color: white; }
@@ -59,7 +46,6 @@
 
 <div class="stars"></div>
 <div class="container">
-    
     <div id="screen-start" class="card">
         <h1 style="color:var(--primary); margin:0;">THR YUDI</h1>
         <button class="btn btn-primary" onclick="goTo('screen-host-setup')">ADMIN MODE</button>
@@ -86,7 +72,6 @@
     </div>
 
     <div id="screen-part-join" class="card" style="display:none;">
-        <h3>Join Room</h3>
         <input type="text" id="p-name" placeholder="Nama Lengkap">
         <input type="text" id="p-id" placeholder="Kode Room">
         <button class="btn btn-primary" onclick="initPart()">GABUNG</button>
@@ -96,7 +81,6 @@
 
     <div id="screen-part-lobby" class="card" style="display:none;">
         <h2 style="color:var(--primary)">SABAR...</h2>
-        <p>Lagi nunggu Yudi start gamenya.</p>
         <p id="wait-name" style="font-weight:bold; color:var(--gold);"></p>
     </div>
 
@@ -105,13 +89,10 @@
             <b id="game-label">GAME</b>
             <span id="user-label" style="background:#eee; padding:2px 8px; border-radius:5px; color:#000; font-size:0.8em;"></span>
         </div>
-
         <div id="game-box"></div>
-
         <div id="host-controls" style="display:none;">
             <button class="btn btn-gold" onclick="revealAll()">🎁 BUKA HASIL SEMUA</button>
             <button class="btn btn-danger" onclick="resetGame()">RESET / BALIK LOBBY</button>
-            
             <div class="admin-panel">
                 <h4 style="margin:0; border-bottom:1px solid #ddd;">TABEL REKAP</h4>
                 <table class="recap-table">
@@ -189,16 +170,38 @@
         db.ref('active_sessions/' + myRoomId).once('value', snap => {
             const ps = Object.keys(snap.val().players || {});
             if(ps.length === 0) return alert("Belum ada peserta!");
-            let budget = snap.val().budget, list = [], current = 0;
-            for(let i=0; i<ps.length; i++) {
-                if(i === ps.length - 1) list.push(budget - current);
-                else {
-                    let s = Math.round((budget / ps.length) * (0.7 + Math.random() * 0.6) / 1000) * 1000;
-                    list.push(s); current += s;
-                }
+            
+            let totalBudget = snap.val().budget;
+            let count = ps.length;
+            let list = [];
+            let tempTotal = 0;
+
+            // Logika baru: Buat angka acak dulu, lalu skalakan ke budget asli
+            for(let i=0; i<count; i++) {
+                let r = 10 + Math.random() * 90; // Angka acak 10-100
+                list.push(r);
+                tempTotal += r;
             }
-            list.sort((a, b) => b - a);
-            db.ref('active_sessions/' + myRoomId).update({ status: 'playing', gameType: type, budgetList: list, showResults: (type === 'slot' || type === 'redlight'), light: 'red' });
+            
+            // Skalakan ke budget asli dan bulatkan ke 1000 terdekat
+            let finalBudgetList = list.map((val, i) => {
+                if(i === count - 1) return totalBudget - list.slice(0, -1).reduce((a,b) => a + Math.round((b/tempTotal * totalBudget)/1000)*1000, 0);
+                return Math.round((val / tempTotal * totalBudget) / 1000) * 1000;
+            });
+
+            // ACAK TOTAL daftar hadiahnya biar urutan masuk gak ngaruh
+            finalBudgetList.sort(() => Math.random() - 0.5);
+
+            // Khusus RedLight tetap urut besar-kecil karena itu sistem ranking
+            if(type === 'redlight') finalBudgetList.sort((a,b) => b-a);
+
+            db.ref('active_sessions/' + myRoomId).update({ 
+                status: 'playing', 
+                gameType: type, 
+                budgetList: finalBudgetList, 
+                showResults: (type === 'slot' || type === 'redlight'), 
+                light: 'red' 
+            });
             if(type === 'redlight') startLightCycle();
         });
     }
@@ -218,7 +221,6 @@
         }
     }
 
-    // --- GAME 1: ANGPAO TERBANG ---
     function renderPancing() {
         const box = document.getElementById('game-box');
         let myD = null;
@@ -237,7 +239,6 @@
         });
     }
 
-    // --- GAME 2: TEBAK ANGKA ---
     function renderAngka() {
         const box = document.getElementById('game-box');
         box.innerHTML = "<div class='grid-game'></div>";
@@ -253,7 +254,6 @@
         });
     }
 
-    // --- GAME 3: SLOT UNTUNG (DENGAN STOP) ---
     function renderSlot() {
         const box = document.getElementById('game-box');
         let myW = null;
@@ -288,7 +288,6 @@
         });
     }
 
-    // --- GAME 4: LAMPU MERAH HIJAU ---
     function startLightCycle() {
         if(!isHost) return;
         const cycle = () => {
@@ -314,13 +313,11 @@
         const box = document.getElementById('game-box');
         let myD = null;
         if(room.selections) Object.values(room.selections).forEach(s => { if(s.name === myName) myD = s; });
-
         if(myD && walkProgress >= 100) {
             box.innerHTML = `<div style="text-align:center; padding-top:80px;"><h2>🏁 FINISH!</h2>
-            ${room.showResults ? `<h1>Rp${myD.val.toLocaleString()}</h1>` : '<p>Tunggu hasil diumumkan Yudi...</p>'}</div>`;
+            ${room.showResults ? `<h1>Rp${myD.val.toLocaleString()}</h1>` : '<p>Tunggu hasil...</p>'}</div>`;
             if(room.showResults) handleVoice(myD.val); return;
         }
-
         box.innerHTML = `
             <div id="light-ind" class="light-indicator light-${currentLight}">${currentLight === 'red' ? 'BERHENTI! 🛑' : 'JALAN! 🏃'}</div>
             <div class="progress-bar"><div id="progress-inner" style="width:${walkProgress}%"></div></div>
@@ -343,7 +340,6 @@
         }
     }
 
-    // --- CORE LOGICS ---
     function pick(i, v) {
         db.ref(`active_sessions/${myRoomId}/selections/${i}`).transaction(c => c === null ? { name: myName, val: v } : undefined, (err, ok) => { if(ok) { hasPicked = true; confetti(); } });
     }
