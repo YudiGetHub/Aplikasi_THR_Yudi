@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>THR Yudi v33.0 - Layout Fix</title>
+    <title>THR Yudi v34.0 - Input Fix</title>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
@@ -16,27 +16,33 @@
         .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #113311 0%, #051a06 100%); z-index: -1; }
         .container { max-width: 450px; margin: auto; padding: 10px; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* Card Styles */
         .card { background: rgba(255,255,255,0.95); border-radius: 15px; padding: 15px; color: #111; border: 2px solid var(--gold); margin-bottom: 10px; text-align: center; }
         
-        /* Buttons */
         .btn { border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; width: 100%; margin-top: 8px; text-transform: uppercase; }
         .btn-gold { background: var(--gold); color: white; box-shadow: 0 4px 0 #b8860b; }
         .btn-danger { background: #d32f2f; color: white; box-shadow: 0 4px 0 #9a1f1f; }
         .btn-primary { background: var(--primary); color: var(--gold); }
 
-        input, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 8px; text-align: center; font-family: inherit; }
+        /* FIX: Menambahkan box-sizing agar input tidak melebihi kotak */
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0; 
+            border: 1px solid #ccc; 
+            border-radius: 10px; 
+            text-align: center; 
+            font-family: inherit;
+            box-sizing: border-box; /* Ini kuncinya biar gak meluber */
+            display: block;
+        }
 
-        /* Game Box */
         #game-box { position: relative; width: 100%; height: 300px; background: rgba(0,0,0,0.5); border-radius: 15px; overflow: hidden; border: 2px solid var(--gold); margin-bottom: 10px; }
         
-        /* Host Table Section - ALWAYS WHITE */
         .admin-panel { background: var(--white); border-radius: 15px; padding: 15px; color: #333; margin-top: 10px; border: 3px solid var(--gold); }
         .recap-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
         .recap-table th { background: #f0f0f0; padding: 8px; text-align: left; border-bottom: 2px solid #ddd; }
         .recap-table td { padding: 8px; border-bottom: 1px solid #eee; }
 
-        /* Game Elements */
         .angpao { position: absolute; width: 45px; height: 65px; background: #e63946; border: 2px solid var(--gold); border-radius: 5px; animation: fall linear infinite; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2em; }
         .angpao::after { content: '🧧'; }
         @keyframes fall { 0% { transform: translateY(-80px); } 100% { transform: translateY(320px); } }
@@ -76,6 +82,7 @@
     </div>
 
     <div id="screen-part-join" class="card" style="display:none;">
+        <h3>Join Room</h3>
         <input type="text" id="p-name" placeholder="Nama Lengkap">
         <input type="text" id="p-id" placeholder="Kode Room">
         <button class="btn btn-primary" onclick="initPart()">GABUNG</button>
@@ -160,7 +167,6 @@
             room = snap.val();
             if(!room) return;
             if(isHost) document.getElementById('player-count').innerText = Object.keys(room.players || {}).length + " Peserta";
-            
             if(room.status === 'playing') {
                 goTo('screen-game');
                 document.getElementById('host-controls').style.display = isHost ? 'block' : 'none';
@@ -176,6 +182,7 @@
         const type = document.getElementById('g-type').value;
         db.ref('active_sessions/' + myRoomId).once('value', snap => {
             const ps = Object.keys(snap.val().players || {});
+            if(ps.length === 0) return alert("Belum ada peserta!");
             let budget = snap.val().budget, list = [], current = 0;
             for(let i=0; i<ps.length; i++) {
                 if(i === ps.length - 1) list.push(budget - current);
